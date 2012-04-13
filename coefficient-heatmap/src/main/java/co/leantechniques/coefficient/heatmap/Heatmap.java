@@ -2,7 +2,6 @@ package co.leantechniques.coefficient.heatmap;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class Heatmap {
     public static final String WHITESPACE = "\\s+";
@@ -14,11 +13,12 @@ public class Heatmap {
         hgLog = log;
     }
 
-    public String generateForRepository() {
+
+    public String generate() {
         Map<String, Integer> files = new HashMap<String, Integer>();
-        Scanner scanner = new Scanner(hgLog.execute());
-        while (scanner.hasNextLine()) {
-            String filesInThisCommit = scanner.nextLine().split(MESSAGE_AND_FILES_SEPARATOR)[1];
+        CommitReader commits = new CommitReader(hgLog.execute());
+        while (commits.hasMoreCommits()) {
+            String filesInThisCommit = commits.nextCommit().split(MESSAGE_AND_FILES_SEPARATOR)[1];
             for (String filename : filesInThisCommit.split(WHITESPACE)) {
                 setFileAppearances(files, filename);
             }
