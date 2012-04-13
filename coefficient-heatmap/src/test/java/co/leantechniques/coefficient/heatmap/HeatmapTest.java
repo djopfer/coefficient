@@ -1,51 +1,68 @@
 package co.leantechniques.coefficient.heatmap;
 
-import com.aragost.javahg.BaseRepository;
-import com.aragost.javahg.Repository;
-import com.aragost.javahg.commands.AddCommand;
-import com.aragost.javahg.commands.CommitCommand;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HeatmapTest {
 
-    private BaseRepository repo;
-    public static final File REPO_DIRECTORY = new File("./target/temp-repo");
+    private String commitData = "";
+    private String reportFromHg;
 
     @Test
-    public void s() {
+    public void reportsOnEachFileCommitted() {
+        givenCommit("US1234 First message", "File1.java", "File2.java");
+        givenCommit("US4321 Second message", "File2.java", "File3.java");
 
-        REPO_DIRECTORY.mkdirs();
+        HgLog logCommand = mock(HgLog.class);
+        when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
 
-        repo = Repository.create(REPO_DIRECTORY);
-        givenCommit("First message", "File1.java", "File2.java");
-        givenCommit("Second message", "File2.java", "File3.java");
+        reportFromHg = new Heatmap(logCommand).generateForRepository();
 
-        String s = new Heatmap(new HgLog("./target/temp-repo")).generateForRepository();
+        assertReportContainsFile("File1.java");
+        assertReportContainsFile("File2.java");
+        assertReportContainsFile("File3.java");
+    }
 
-        assertTrue(s.contains("File1.java"));
-        assertTrue(s.contains("File2.java"));
-        assertTrue(s.contains("File3.java"));
+    @Test
+    public void reportsSizeOfFilename() {
+        givenCommit("US1234 First message", "File1.java");
+
+        HgLog logCommand = mock(HgLog.class);
+        when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
+
+        reportFromHg = new Heatmap(logCommand).generateForRepository();
+
+        assertTrue(reportFromHg.contains("<div size='1'>File1.java</div>"));
+    }
+
+    @Test
+    public void reportsSizeOfFileBasedOnNumberOfTotalAppearances() {
+        givenCommit("US1234 First message", "File1.java");
+        givenCommit("US4321 Second message", "File1.java");
+
+        HgLog logCommand = mock(HgLog.class);
+        when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
+
+        reportFromHg = new Heatmap(logCommand).generateForRepository();
+
+        assertTrue(reportFromHg.contains("<div size='2'>File1.java</div>"));
+    }
+
+    private void assertReportContainsFile(String filename) {
+        assertTrue(reportFromHg.contains(filename));
     }
 
     private void givenCommit(String message, String... files) {
-        for(String filename : files) {
-            createFileNamed(filename);
+        commitData += message + "||";
+        for (String filename : files) {
+            commitData += (filename + " ");
         }
-
-        AddCommand.on(repo).execute(files);
-        CommitCommand.on(repo).user("Brandon").message(message).execute(files);
+        commitData += System.getProperty("line.separator");
     }
 
-    private void createFileNamed(String filename) {
-        try {
-            new File(REPO_DIRECTORY, filename).createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

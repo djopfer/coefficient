@@ -5,6 +5,7 @@ import com.aragost.javahg.commands.LogCommand;
 import com.aragost.javahg.internals.LineIterator;
 
 import java.io.File;
+import java.io.InputStream;
 
 public class HgLog extends LogCommand {
 
@@ -12,8 +13,8 @@ public class HgLog extends LogCommand {
         super(Repository.open(new File(repoLocation)));
     }
 
-    public LineIterator execute() {
+    public InputStream execute() {
         cmdAppend("--template", "{desc}||{files}\\n");
-        return launchIterator();
+        return this.launchStream();
     }
 }
