@@ -17,13 +17,16 @@ public class LogVerify extends AbstractMojo {
      *
      * @parameter url=""
      */
-    private String url;
-    private UrlHandler urlHandler;
+    private String url = "";
+    private UrlHandler urlHandler = new UrlHandler();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if(url.contains("${username}"))
+            url = url.replace("${username}", System.getProperty("user.name"));
+
         if (!urlHandler.makeRequestTo(url))
-            getLog().warn("Unable to access the server for logging the verify command.");
+            getLog().warn("Unable to access the server for logging 'verify'. URL used is '" + url + "'.");
     }
 
     public void setUrlHandler(UrlHandler urlHandler) {

@@ -18,6 +18,7 @@
     <url>http://leantechniques.co/coefficient</url>
     <modules>
         <module>coefficient-mvn</module>
+        <module>coefficient-heatmap</module>
     </modules>
     <dependencies>
         <dependency>

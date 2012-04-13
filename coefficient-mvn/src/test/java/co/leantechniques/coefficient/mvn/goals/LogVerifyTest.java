@@ -13,23 +13,32 @@ public class LogVerifyTest {
 
     private Log logger;
     private LogVerify goal;
+    private FakeUrlHandler fakeHandler;
 
     @Before
     public void setUp() throws Exception {
         goal = new MockedLogVerify();
         logger = mock(Log.class);
+        fakeHandler = configureHandler();
     }
 
     @Test
     public void usesTheUrlSpecifiedToMakeTheRequest() throws MojoExecutionException, MojoFailureException {
-        FakeUrlHandler fakeHandler = new FakeUrlHandler();
-
-        goal.setUrl("http://someserver/logger");
-        goal.setUrlHandler(fakeHandler);
+        whenUrlIsConfiguredAs("http://someserver/logger");
 
         goal.execute();
 
         assertEquals("http://someserver/logger", fakeHandler.calledWith);
+    }
+
+    @Test
+    public void allowsParameterizedUrlsThatContainPlaceholderForUsername() throws MojoExecutionException, MojoFailureException {
+        assumingLoggedInUserIs("bob");
+        whenUrlIsConfiguredAs("http://someserver/logger?username=${username}");
+
+        goal.execute();
+
+        assertEquals("http://someserver/logger?username=bob", fakeHandler.calledWith);
     }
 
     @Test
@@ -47,7 +56,21 @@ public class LogVerifyTest {
 
         goal.execute();
 
-        verify(logger).warn("Unable to access the server for logging the verify command.");
+        verify(logger).warn("Unable to access the server for logging 'verify'. URL used is ''.");
+    }
+
+    private FakeUrlHandler configureHandler() {
+        FakeUrlHandler fakeHandler = new FakeUrlHandler();
+        goal.setUrlHandler(fakeHandler);
+        return fakeHandler;
+    }
+
+    private void whenUrlIsConfiguredAs(String url) {
+        goal.setUrl(url);
+    }
+
+    private String assumingLoggedInUserIs(String username) {
+        return System.setProperty("user.name", username);
     }
 
     private class MockedLogVerify extends LogVerify {
