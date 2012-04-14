@@ -24,10 +24,8 @@ public class HeatmapTest {
 
     @Test
     public void reportsOnEachFileCommitted() {
-        givenCommit("US1234 First message", "File1.java", "File2.java");
-        givenCommit("US4321 Second message", "File2.java", "File3.java");
-
-        logShouldReturnCommits();
+        givenLogContains(commit("US1234 First message", "File1.java", "File2.java"),
+                         commit("US4321 Second message", "File2.java", "File3.java"));
 
         reportFromHg = new Heatmap(logCommand).generate();
 
@@ -38,17 +36,20 @@ public class HeatmapTest {
 
     @Test
     public void reportsSizeOfFileBasedOnNumberOfTotalAppearances() {
-        givenCommit("US1234 First message", "File1.java");
-        givenCommit("US4321 Second message", "File1.java");
 
-        logShouldReturnCommits();
+        givenLogContains(commit("US1234 First message", "File1.java"),
+                         commit("US4321 Second message", "File1.java"));
 
         reportFromHg = heatmap.generate();
 
         assertReportContains("<div size='2'>File1.java</div>");
     }
 
-    private void logShouldReturnCommits() {
+    private void givenLogContains(String... commits) {
+        String commitData = "";
+        for(String commit : commits) {
+            commitData += commit;
+        }
         when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
     }
 
@@ -56,12 +57,14 @@ public class HeatmapTest {
         assertTrue(reportFromHg.contains(filename));
     }
 
-    private void givenCommit(String message, String... files) {
-        commitData += message + "||";
+    private String commit(String message, String... files) {
+        String commitData = message + "||";
         for (String filename : files) {
             commitData += (filename + " ");
         }
         commitData += System.getProperty("line.separator");
+        this.commitData += commitData;
+        return commitData;
     }
 
 }

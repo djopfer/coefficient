@@ -1,30 +1,27 @@
 package co.leantechniques.coefficient.heatmap;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import static co.leantechniques.coefficient.heatmap.CommitParser.EachCommit;
+
 public class Heatmap {
-    public static final String WHITESPACE = "\\s+";
-    public static final String MESSAGE_AND_FILES_SEPARATOR = "\\|\\|";
 
     private HgLog hgLog;
+    private CommitAnalyzer commitAnalyzer = new CommitAnalyzer();
 
     public Heatmap(HgLog log) {
         hgLog = log;
     }
 
-
     public String generate() {
-        Map<String, Integer> files = new HashMap<String, Integer>();
-        CommitReader commits = new CommitReader(hgLog.execute());
-        while (commits.hasMoreCommits()) {
-            String filesInThisCommit = commits.nextCommit().split(MESSAGE_AND_FILES_SEPARATOR)[1];
-            for (String filename : filesInThisCommit.split(WHITESPACE)) {
-                setFileAppearances(files, filename);
+        new CommitParser(hgLog.execute()).analyze(new EachCommit() {
+            @Override
+            public void process(String commit, String[] fileNames) {
+                commitAnalyzer.process(fileNames);
             }
-        }
+        });
 
-        return renderHtml(files);
+        return renderHtml(commitAnalyzer.results());
     }
 
     private String renderHtml(Map<String, Integer> files) {
@@ -33,18 +30,6 @@ public class Heatmap {
             html += "<div size='" + files.get(file) + "'>" + file + "</div>";
         }
         return html;
-    }
-
-    private void setFileAppearances(Map<String, Integer> files, String filename) {
-        if (!files.containsKey(filename)) {
-            files.put(filename, 1);
-        } else {
-            incrementFileAppearances(files, filename);
-        }
-    }
-
-    private void incrementFileAppearances(Map<String, Integer> files, String filename) {
-        files.put(filename, files.get(filename) + 1);
     }
 
 }
