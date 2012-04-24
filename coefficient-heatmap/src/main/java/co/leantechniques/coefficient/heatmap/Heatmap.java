@@ -1,35 +1,47 @@
 package co.leantechniques.coefficient.heatmap;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static co.leantechniques.coefficient.heatmap.CommitParser.EachCommit;
+import java.util.Set;
 
 public class Heatmap {
 
     private HgLog hgLog;
-    private CommitAnalyzer commitAnalyzer = new CommitAnalyzer();
 
     public Heatmap(HgLog log) {
         hgLog = log;
     }
 
     public String generate() {
-        new CommitParser(hgLog.execute()).analyze(new EachCommit() {
-            @Override
-            public void process(String commit, String[] fileNames) {
-                commitAnalyzer.process(fileNames);
-            }
-        });
+        ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(hgLog.execute(), "||", "\\s+");
 
-        return renderHtml(commitAnalyzer.results());
+        Map<String, Set<String>> changesets = changesetAnalyzer.groupChangesetsByStory();
+
+        Map<String, Integer> files = changesPerFile(changesets);
+
+        return new HtmlRenderer().render(files);
     }
 
-    private String renderHtml(Map<String, Integer> files) {
-        String html = "";
-        for (String file : files.keySet()) {
-            html += "<div size='" + files.get(file) + "'>" + file + "</div>";
+    private Map<String, Integer> changesPerFile(Map<String, Set<String>> changesets) {
+        Map<String, Integer> r = new HashMap<String, Integer>();
+        for (String story : changesets.keySet()) {
+            for (String file : changesets.get(story)) {
+                if (r.containsKey(file)) {
+                    incrementCountForFile(r, file);
+                } else {
+                    initializeCount(r, file);
+                }
+            }
         }
-        return html;
+        return r;
+    }
+
+    private void initializeCount(Map<String, Integer> r, String file) {
+        r.put(file, 1);
+    }
+
+    private void incrementCountForFile(Map<String, Integer> r, String file) {
+        r.put(file, r.get(file) + 1);
     }
 
 }

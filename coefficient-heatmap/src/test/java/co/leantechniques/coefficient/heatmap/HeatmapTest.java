@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 public class HeatmapTest {
 
-    private String commitData = "";
     private String reportFromHg;
     private HgLog logCommand;
     private Heatmap heatmap;
@@ -35,8 +34,7 @@ public class HeatmapTest {
     }
 
     @Test
-    public void reportsSizeOfFileBasedOnNumberOfTotalAppearances() {
-
+    public void reportsSizeOfFileBasedOnNumberOfChanges() {
         givenLogContains(commit("US1234 First message", "File1.java"),
                          commit("US4321 Second message", "File1.java"));
 
@@ -45,9 +43,19 @@ public class HeatmapTest {
         assertReportContains("<div size='2'>File1.java</div>");
     }
 
+    @Test
+    public void multipleCommitsForTheSameTicketAreTreatedAsSingleChange() {
+        givenLogContains(commit("US1234 First message", "File1.java"),
+                         commit("US1234 Second message", "File1.java"));
+
+        reportFromHg = heatmap.generate();
+
+        assertReportContains("<div size='1'>File1.java</div>");
+    }
+
     private void givenLogContains(String... commits) {
         String commitData = "";
-        for(String commit : commits) {
+        for (String commit : commits) {
             commitData += commit;
         }
         when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
@@ -57,13 +65,12 @@ public class HeatmapTest {
         assertTrue(reportFromHg.contains(filename));
     }
 
-    private String commit(String message, String... files) {
+    public static String commit(String message, String... files) {
         String commitData = message + "||";
         for (String filename : files) {
             commitData += (filename + " ");
         }
         commitData += System.getProperty("line.separator");
-        this.commitData += commitData;
         return commitData;
     }
 
