@@ -1,8 +1,11 @@
 package co.leantechniques.coefficient.heatmap;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertTrue;
 
@@ -10,7 +13,7 @@ public class HtmlRendererTest {
 
     @Test
     public void ordersTheTagCloudBasedOnFilename() {
-        HashMap<String, Integer> changes = new HashMap<String, Integer>();
+        Map<String, Integer> changes = new TreeMap<String, Integer>();
         changes.put("AbstractChainOfResponsibilityFactory.java", 1);
         changes.put("ZumbaTraining.java", 1);
         changes.put("BasicChainOfResponsibilityFactory.java", 1);
@@ -31,7 +34,7 @@ public class HtmlRendererTest {
         HashMap<String, Integer> changes = new HashMap<String, Integer>();
         changes.put("src/main/java/com/example/ChangeSet.java", 1);
 
-        assertMatches("<li .+>ChangeSet</li>", render(changes));
+        assertMatches("<li(.+)>ChangeSet</li>", render(changes));
     }
 
     @Test
@@ -44,11 +47,30 @@ public class HtmlRendererTest {
 
     @Test
     public void adjustsTheFontSizeOfEachTagRelativeToTheNumberOfChangesInTheFile() {
-//    file_with( :changes =>  3 ).should have_font_size(6)
-//    file_with( :changes =>  6 ).should have_font_size(15)
-//    file_with( :changes => 12 ).should have_font_size(36)
-    }
+        Map<String, Integer> changes = new HashMap<String, Integer>();
+        changes.put("src/main/java/com/example/NotChangedOften.java", 1);
+        changes.put("src/main/java/com/example/ChangedMoreOften.java", 6);
+        changes.put("src/main/java/com/example/AlwaysChanging.java", 12);
 
+        String html = render(changes);
+
+        assertMatches("font-size: 6", html);
+        assertMatches("font-size: 18", html);
+        assertMatches("font-size: 36", html);
+    }
+    @Test
+    public void adjustsTheFontSizeRelativeToTheTotalNumberOfChanges() {
+        Map<String, Integer> changes = new HashMap<String, Integer>();
+        changes.put("src/main/java/com/example/NotChangedOften.java", 10);
+        changes.put("src/main/java/com/example/ChangedMoreOften.java", 15);
+        changes.put("src/main/java/com/example/AlwaysChanging.java", 20);
+
+        String html = render(changes);
+
+        assertMatches("font-size: 6", html);
+        assertMatches("font-size: 21", html);
+        assertMatches("font-size: 36", html);
+    }
     @Test
     public void adjustsTheFontColorOfEachTagBasedOnTheNumberOfChangesThatWereDefects() {
 //    file_with( :changes => 3 ).should have_color('0, 255, 0')
@@ -62,7 +84,7 @@ public class HtmlRendererTest {
 
     @Test
     public void generatesARangeOfFontSizesBasedOnAMinMax() {
-//    @formatter.size_for(12).should == 36
+//            @formatter.size_for(12).should == 36
 //    @formatter.size_for(11).should == 30
 //    @formatter.size_for(8).should  == 21
 //    @formatter.size_for(7).should  == 18
@@ -79,8 +101,7 @@ public class HtmlRendererTest {
         return "Expected <" + target + "> to match <" + pattern + ">";
     }
 
-    private String render(HashMap<String, Integer> changes) {
-        String html = new HtmlRenderer().render(changes);
-        return html;
+    private String render(Map<String, Integer> changes) {
+        return new HtmlRenderer(changes).render();
     }
 }

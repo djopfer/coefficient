@@ -19,7 +19,7 @@ public class Heatmap {
 
         Map<String, Integer> files = changesPerFile(changesets);
 
-        return new HtmlRenderer().render(files);
+        return new HtmlRenderer(files).render();
     }
 
     private Map<String, Integer> changesPerFile(Map<String, Set<String>> changesets) {
