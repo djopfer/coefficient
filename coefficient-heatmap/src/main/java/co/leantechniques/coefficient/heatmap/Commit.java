@@ -17,8 +17,11 @@ public class Commit {
 
     public String getStory() {
         Matcher matcher = Pattern.compile("US\\d+").matcher(message);
-        matcher.find();
-        return matcher.group();
+        boolean wasFound = matcher.find();
+        if (wasFound)
+            return matcher.group();
+        else
+            return "Unknown";
     }
 
     public Set<String> getFiles() {

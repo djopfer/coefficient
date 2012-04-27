@@ -19,30 +19,47 @@ public class HtmlRenderer {
         range = max(changeCounts) - floor;
     }
 
+
+
     public String render() {
-        String heatmap = "";
+        String heatmap = "<html>" +
+                         "<head>" +
+                            "<title>SCM Heatmap</title>" +
+                            "<style type='text/css'>" +
+                                "body { font-family: sans-serif; color: lightgrey; }" +
+                                "ol li { display: inline; margin: 2px; }" +
+                            "</style>" +
+                         "</head>" +
+                         "<body>" +
+                            "<ol>";
         for (String file : sorted(files.keySet())) {
             heatmap += tagFor(file);
         }
-        return heatmap;
+        return heatmap +    "</ol>" +
+                         "</body>" +
+                         "</html>";
     }
 
     private ArrayList sorted(Collection<Integer> values) {
-        ArrayList changeCounts1 = new ArrayList(values);
-        Collections.sort(changeCounts1);
-        return changeCounts1;
+        ArrayList list = new ArrayList(values);
+        Collections.sort(list);
+        return list;
     }
 
-    private Integer max(ArrayList<Integer> changesValues) {
-        return changesValues.get(changesValues.size() - 1);
+    private Integer max(ArrayList<Integer> presortedValues) {
+        return presortedValues.get(presortedValues.size() - 1);
     }
 
-    private Integer min(ArrayList<Integer> changesValues) {
-        return changesValues.get(0);
+    private Integer min(ArrayList<Integer> presortedValues) {
+        return presortedValues.get(0);
     }
 
     private String tagFor(String file) {
-        return "<li " + styleOf(files.get(file)) + " title='" + file + "'>" + baseNameOf(file) + "</li>";
+        return "<li " + styleOf(numberOfChangesTo(file)) + " title='" + file + "'>" + baseNameOf(file) + "</li>";
+    }
+
+    private Integer numberOfChangesTo(String file) {
+        return files.get(file);
     }
 
     private String styleOf(int changeCount) {

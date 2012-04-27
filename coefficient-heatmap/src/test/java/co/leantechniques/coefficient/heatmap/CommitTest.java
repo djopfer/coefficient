@@ -14,6 +14,11 @@ public class CommitTest {
     }
 
     @Test
+    public void admitsItWhenItCantFigureOutWhatStory() {
+        assertEquals("Unknown", new Commit("Message without a story").getStory());
+    }
+
+    @Test
     public void knowsWhatFilesAreContainedWithinTheCommit() {
         Set<String> filesCommitted = new Commit(null, "File1.java", "File2.java", "File3.java").getFiles();
 

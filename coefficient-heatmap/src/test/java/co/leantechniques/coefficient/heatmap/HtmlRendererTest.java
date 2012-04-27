@@ -1,6 +1,6 @@
 package co.leantechniques.coefficient.heatmap;
 
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -11,9 +11,23 @@ import static org.junit.Assert.assertTrue;
 
 public class HtmlRendererTest {
 
+    private Map<String, Integer> changes;
+
+    @Before
+    public void setUp() {
+        changes = new TreeMap<String, Integer>();
+    }
+
+
+    @Test
+    public void generatesTheCloudInHtml() {
+        changes.put("AbstractChainOfResponsibilityFactory.java", 1);
+        assertMatches("<html><head>(.*)</head><body><ol>(.*)</ol></body></html>", render(changes));
+    }
+
     @Test
     public void ordersTheTagCloudBasedOnFilename() {
-        Map<String, Integer> changes = new TreeMap<String, Integer>();
+        changes = new TreeMap<String, Integer>();
         changes.put("AbstractChainOfResponsibilityFactory.java", 1);
         changes.put("ZumbaTraining.java", 1);
         changes.put("BasicChainOfResponsibilityFactory.java", 1);
@@ -58,6 +72,7 @@ public class HtmlRendererTest {
         assertMatches("font-size: 18", html);
         assertMatches("font-size: 36", html);
     }
+
     @Test
     public void adjustsTheFontSizeRelativeToTheTotalNumberOfChanges() {
         Map<String, Integer> changes = new HashMap<String, Integer>();
@@ -71,6 +86,7 @@ public class HtmlRendererTest {
         assertMatches("font-size: 21", html);
         assertMatches("font-size: 36", html);
     }
+
     @Test
     public void adjustsTheFontColorOfEachTagBasedOnTheNumberOfChangesThatWereDefects() {
 //    file_with( :changes => 3 ).should have_color('0, 255, 0')
@@ -80,17 +96,6 @@ public class HtmlRendererTest {
 //
 //    file_with( :changes => 10,
 //    :defects => 5 ).should have_color('127, 128, 0')
-    }
-
-    @Test
-    public void generatesARangeOfFontSizesBasedOnAMinMax() {
-//            @formatter.size_for(12).should == 36
-//    @formatter.size_for(11).should == 30
-//    @formatter.size_for(8).should  == 21
-//    @formatter.size_for(7).should  == 18
-//    @formatter.size_for(4).should  ==  9
-//    @formatter.size_for(3).should  ==  6
-
     }
 
     private void assertMatches(String pattern, String target) {
