@@ -21,7 +21,7 @@ public class HeatmapTest {
 
     @Before
     public void setUp() throws Exception {
-        logCommand = mock(HgLog.class);
+        logCommand = mock(Mercurial.class);
         heatmap = new Heatmap(logCommand, new NullWriter());
     }
 

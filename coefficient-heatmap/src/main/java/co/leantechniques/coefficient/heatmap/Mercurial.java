@@ -6,11 +6,11 @@ import com.aragost.javahg.commands.LogCommand;
 import java.io.File;
 import java.io.InputStream;
 
-public class HgLog implements ScmAdapter {
+public class Mercurial implements ScmAdapter {
 
     private String repoLocation;
 
-    public HgLog() {
+    public Mercurial() {
         this.repoLocation = repoLocation;
     }
 

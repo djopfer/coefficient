@@ -1,8 +1,5 @@
 package co.leantechniques.coefficient.heatmap;
 
-import co.leantechniques.coefficient.heatmap.HgLog;
-import co.leantechniques.coefficient.heatmap.ScmAdapter;
-
 import java.util.HashMap;
 
 public class AdapterFactory {
@@ -10,7 +7,7 @@ public class AdapterFactory {
     public static final HashMap<String,Class<? extends ScmAdapter>> SUPPORTED_ADAPTERS = new HashMap<String, Class<? extends ScmAdapter>>();
 
     static {
-        SUPPORTED_ADAPTERS.put("hg", HgLog.class);
+        SUPPORTED_ADAPTERS.put("hg", Mercurial.class);
     }
 
     public ScmAdapter adapterFor(String scmAdapter) {
