@@ -1,4 +1,4 @@
-package co.leantechniques.coefficient.mvn.goals;
+package co.leantechniques.coefficient.heatmap;
 
 import co.leantechniques.coefficient.heatmap.HgLog;
 import co.leantechniques.coefficient.heatmap.ScmAdapter;
