@@ -16,13 +16,25 @@ import static org.mockito.Mockito.when;
 public class HeatmapTest {
 
     private String reportFromHg;
-    private ScmRepository logCommand;
+    private ScmAdapter logCommand;
     private Heatmap heatmap;
 
     @Before
     public void setUp() throws Exception {
         logCommand = mock(HgLog.class);
         heatmap = new Heatmap(logCommand, new NullWriter());
+    }
+
+    // Test Split on || fails
+    // Test message contains newlines
+    @Test
+    public void supportsCommitMessagesWithEmbeddedNewlines() {
+        givenLogContains(commit("US1234 Message with" + System.getProperty("line.separator") + "embedded newline", "File1.java", "File2.java"));
+
+        reportFromHg = heatmap.generate();
+
+        assertReportContains("File1.java");
+        assertReportContains("File2.java");
     }
 
     @Test

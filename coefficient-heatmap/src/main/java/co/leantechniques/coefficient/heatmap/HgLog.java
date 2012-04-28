@@ -2,20 +2,34 @@ package co.leantechniques.coefficient.heatmap;
 
 import com.aragost.javahg.Repository;
 import com.aragost.javahg.commands.LogCommand;
-import com.aragost.javahg.internals.LineIterator;
 
 import java.io.File;
 import java.io.InputStream;
 
-public class HgLog extends LogCommand implements ScmRepository {
+public class HgLog implements ScmAdapter {
 
-    public HgLog(String repoLocation) {
-        super(Repository.open(new File(repoLocation)));
+    private String repoLocation;
+
+    public HgLog() {
+        this.repoLocation = repoLocation;
     }
 
-    @Override
+    public void setRepoLocation(String repoLocation) {
+        this.repoLocation = repoLocation;
+    }
+
     public InputStream execute() {
-        cmdAppend("--template", "{desc}||{files}\\n");
-        return this.launchStream();
+        return new HgLogs(repoLocation).execute();
+    }
+
+    private class HgLogs extends LogCommand {
+        public HgLogs(String repoLocation) {
+            super(Repository.open(new File(repoLocation)));
+        }
+
+        public InputStream execute() {
+            cmdAppend("--template", "{desc}||{files}\\n");
+            return this.launchStream();
+        }
     }
 }

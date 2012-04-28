@@ -32,8 +32,21 @@ public class ChangesetAnalyzer {
     }
 
     private Commit createFrom(String message) {
-        String[] commitData = message.split(messageSeparator);
+        String[] commitData = breakOnMessageSeparator(message);
+
+        while (messageSeparatorNotFoundIn(commitData)) {
+            message += nextCommit();
+            commitData = breakOnMessageSeparator(message);
+        }
         return new Commit(commitData[0], commitData[1].split(filesSeparator));
+    }
+
+    private boolean messageSeparatorNotFoundIn(String[] commitData) {
+        return commitData.length == 1;
+    }
+
+    private String[] breakOnMessageSeparator(String message) {
+        return message.split(messageSeparator);
     }
 
     private String nextCommit() {

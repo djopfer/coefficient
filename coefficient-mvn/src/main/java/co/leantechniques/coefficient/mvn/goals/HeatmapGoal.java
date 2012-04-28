@@ -1,8 +1,7 @@
 package co.leantechniques.coefficient.mvn.goals;
 
 import co.leantechniques.coefficient.heatmap.Heatmap;
-import co.leantechniques.coefficient.heatmap.HgLog;
-import co.leantechniques.coefficient.heatmap.ScmRepository;
+import co.leantechniques.coefficient.heatmap.ScmAdapter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -31,6 +30,15 @@ public class HeatmapGoal extends AbstractMojo {
      * @parameter expression="${basedir}"
      */
     private String scmRoot;
+    /**
+     * At this time, the plugin is expected to be configured on the POM located at
+     * the root of the repository.
+     *
+     * @parameter expression="${basedir}"
+     */
+    private String scmAdapter;
+
+    private AdapterFactory factory = new AdapterFactory();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -38,7 +46,9 @@ public class HeatmapGoal extends AbstractMojo {
 
         try {
             File file = buildFileStructureFor();
-            Heatmap heatmap = new Heatmap(new HgLog(scmRoot), new FileWriter(file));
+            ScmAdapter hg = factory.adapterFor(scmAdapter);
+            hg.setRepoLocation(scmRoot);
+            Heatmap heatmap = new Heatmap(hg, new FileWriter(file));
             heatmap.generate();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -50,4 +60,5 @@ public class HeatmapGoal extends AbstractMojo {
         file.getParentFile().mkdirs();
         return file;
     }
+
 }

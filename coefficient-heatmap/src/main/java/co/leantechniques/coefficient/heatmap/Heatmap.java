@@ -8,10 +8,10 @@ import java.util.Set;
 
 public class Heatmap {
 
-    private ScmRepository hgLog;
+    private ScmAdapter hgLog;
     private Writer writer;
 
-    public Heatmap(ScmRepository log, Writer writer) {
+    public Heatmap(ScmAdapter log, Writer writer) {
         hgLog = log;
         this.writer = writer;
     }

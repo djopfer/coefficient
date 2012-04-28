@@ -2,6 +2,8 @@ package co.leantechniques.coefficient.heatmap;
 
 import java.io.InputStream;
 
-public interface ScmRepository {
+public interface ScmAdapter {
     InputStream execute();
+
+    void setRepoLocation(String scmRoot);
 }

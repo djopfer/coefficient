@@ -25,6 +25,16 @@ public class ChangesetAnalyzerTest {
     }
 
     @Test
+    public void isntConfusedByEmbeddedNewlines() throws Exception {
+        String commit = logLine("US1234 Some honkey Message||File1.java".replaceAll(" ", System.getProperty("line.separator")));
+        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        results = analyzer.groupChangesetsByStory();
+
+        assertTrue(assertStoryPresent("US1234"));
+        assertTrue(results.get("US1234").contains("File1.java"));
+    }
+
+    @Test
     public void multipleFilesetsForTheSameStoryAreAggregated() throws Exception {
         String commit = logLine("US1234 Some message||File1.java") +
                         logLine("US1234 Some other message||File2.java") +
