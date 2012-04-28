@@ -1,7 +1,5 @@
 package co.leantechniques.coefficient.heatmap;
 
-import co.leantechniques.coefficient.heatmap.AdapterFactory;
-import co.leantechniques.coefficient.heatmap.HgLog;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

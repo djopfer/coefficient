@@ -1,5 +1,6 @@
 package co.leantechniques.coefficient.mvn.goals;
 
+import co.leantechniques.coefficient.heatmap.AdapterFactory;
 import co.leantechniques.coefficient.heatmap.Heatmap;
 import co.leantechniques.coefficient.heatmap.ScmAdapter;
 import org.apache.maven.plugin.AbstractMojo;
