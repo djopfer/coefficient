@@ -10,17 +10,17 @@ import static junit.framework.Assert.assertTrue;
 public class CommitTest {
     @Test
     public void knowsWhatStoryItsFor() {
-        assertEquals("US1234", new Commit("US1234 Some message").getStory());
+        assertEquals("US1234", new Commit(null, "US1234 Some message").getStory());
     }
 
     @Test
     public void admitsItWhenItCantFigureOutWhatStory() {
-        assertEquals("Unknown", new Commit("Message without a story").getStory());
+        assertEquals("Unknown", new Commit(null, "Message without a story").getStory());
     }
 
     @Test
     public void knowsWhatFilesAreContainedWithinTheCommit() {
-        Set<String> filesCommitted = new Commit(null, "File1.java", "File2.java", "File3.java").getFiles();
+        Set<String> filesCommitted = new Commit(null, null, "File1.java", "File2.java", "File3.java").getFiles();
 
         assertEquals(3, filesCommitted.size());
 

@@ -1,10 +1,7 @@
 package co.leantechniques.coefficient.heatmap;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.regex.Pattern.quote;
 
@@ -38,11 +35,11 @@ public class ChangesetAnalyzer {
             message += nextCommit();
             commitData = breakOnMessageSeparator(message);
         }
-        return new Commit(commitData[0], commitData[1].split(filesSeparator));
+        return new Commit(commitData[0], commitData[1], commitData[2].split(filesSeparator));
     }
 
     private boolean messageSeparatorNotFoundIn(String[] commitData) {
-        return commitData.length == 1;
+        return commitData.length == 2;
     }
 
     private String[] breakOnMessageSeparator(String message) {
@@ -55,5 +52,20 @@ public class ChangesetAnalyzer {
 
     private boolean hasMoreCommits() {
         return scanner.hasNextLine();
+    }
+
+    public Map<String, Set<Commit>> groupByAuthor() {
+        HashMap<String, Set<Commit>> commitsByAuthor = new HashMap<String, Set<Commit>>();
+        while (hasMoreCommits()) {
+            Commit commit = createFrom(nextCommit());
+            if (commitsByAuthor.containsKey(commit.getAuthor()))
+                commitsByAuthor.get(commit.getAuthor()).add(commit);
+            else {
+                Set<Commit> commitSet = new HashSet<Commit>();
+                commitSet.add(commit);
+                commitsByAuthor.put(commit.getAuthor(), commitSet);
+            }
+        }
+        return commitsByAuthor;
     }
 }
