@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.aragost.javahg</groupId>
             <artifactId>javahg</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>0.3</version>
         </dependency>
     </dependencies>
 </project>
