@@ -4,9 +4,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,20 +17,21 @@ import static org.mockito.Mockito.when;
 public class HeatmapTest {
 
     private String reportFromHg;
-    private ScmAdapter logCommand;
     private Heatmap heatmap;
+    private CodeRepository mockRepository;
+    private CommitInfoBuilder builder;
 
     @Before
     public void setUp() throws Exception {
-        logCommand = mock(Mercurial.class);
-        heatmap = new Heatmap(logCommand, new NullWriter());
+        mockRepository = mock(CodeRepository.class);
+        heatmap = new Heatmap(mockRepository, new NullWriter());
+        builder = CommitInfoBuilder.create();
     }
 
-    // Test Split on || fails
-    // Test message contains newlines
     @Test
     public void supportsCommitMessagesWithEmbeddedNewlines() {
-        givenLogContains(commit("US1234 Message with" + System.getProperty("line.separator") + "embedded newline", "File1.java", "File2.java"));
+        String descriptionWithNewLines = "US1234 Message with" + System.getProperty("line.separator") + "embedded newline";
+        givenLogContains(builder.author("tim").description(descriptionWithNewLines).addFiles("File1.java", "File2.java").toCommit());
 
         reportFromHg = heatmap.generate();
 
@@ -39,10 +41,11 @@ public class HeatmapTest {
 
     @Test
     public void reportsOnEachFileCommitted() {
-        givenLogContains(commit("US1234 First message", "File1.java", "File2.java"),
-                         commit("US4321 Second message", "File2.java", "File3.java"));
+        givenLogContains(
+                builder.author("tim").description("US1234 First message").addFiles("File1.java", "File2.java").toCommit(),
+                builder.author("tim").description("").addFiles("File2.java", "File3.java").toCommit());
 
-        reportFromHg = new Heatmap(logCommand, new NullWriter()).generate();
+        reportFromHg = heatmap.generate();
 
         assertReportContains("File1.java");
         assertReportContains("File2.java");
@@ -51,48 +54,29 @@ public class HeatmapTest {
 
     @Test
     public void multipleCommitsForTheSameTicketAreTreatedAsSingleChange() {
-        givenLogContains(commit("US1234 First message", "File1.java"),
-                         commit("US1234 Second message", "File1.java"));
+        givenLogContains(
+                builder.author("tim").description("US1234 First message").addFiles("File1.java").toCommit(),
+                builder.author("tim").description("US1234 Second message").addFiles("File1.java").toCommit());
 
         assertMatches("File1.java", heatmap.generate());
     }
 
-    private void givenLogContains(String... commits) {
-        String commitData = "";
-        for (String commit : commits) {
-            commitData += commit;
-        }
-        when(logCommand.execute()).thenReturn(new ByteArrayInputStream(commitData.getBytes()));
+    private void givenLogContains(Commit... commits) {
+        when(mockRepository.getCommits()).thenReturn(new HashSet<Commit>(Arrays.asList(commits)));
     }
 
     @Test
     public void writesTheReportToTheClientSpecifiedWriter() {
-        givenLogContains(commit("US1234 First message", "File1.java"));
+        givenLogContains(builder.author("tim").description("US1234 First message").addFiles("File1.java").toCommit());
 
         WriterSpy spy = new WriterSpy();
-        new Heatmap(logCommand, spy).generate();
+        new Heatmap(mockRepository, spy).generate();
 
         assertEquals("write(),close(),", spy.logString);
     }
+
     private void assertReportContains(String filename) {
         assertTrue(reportFromHg.contains(filename));
-    }
-
-    public static String commit(String message, String... files) {
-        String commitData = "Author Name||" + message + "||";
-        for (String filename : files) {
-            commitData += (filename + " ");
-        }
-        commitData += System.getProperty("line.separator");
-        return commitData;
-    }
-
-    private void assertMatches(String pattern, String target) {
-        assertTrue(assertionMessage(pattern, target), target.matches(".*" + pattern + ".*"));
-    }
-
-    private String assertionMessage(String pattern, String target) {
-        return "Expected <" + target + "> to match <" + pattern + ">";
     }
 
     private class NullWriter extends Writer {

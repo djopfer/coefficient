@@ -1,8 +1,6 @@
 package co.leantechniques.coefficient.mvn.goals;
 
-import co.leantechniques.coefficient.heatmap.AdapterFactory;
-import co.leantechniques.coefficient.heatmap.Heatmap;
-import co.leantechniques.coefficient.heatmap.ScmAdapter;
+import co.leantechniques.coefficient.heatmap.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -11,6 +9,7 @@ import java.io.*;
 
 /**
  * Generates a heatmap
+ * > mvn coefficient-mvn:heatmap
  *
  * @goal heatmap
  * @parameter expression="${project.build.directory}"
@@ -46,8 +45,7 @@ public class HeatmapGoal extends AbstractMojo {
         getLog().info("Generating heatmap in " + outputFile);
 
         try {
-            ScmAdapter hg = factory.adapterFor(scmAdapter);
-            hg.setRepoLocation(scmRoot);
+            CodeRepository hg = factory.adapterFor(new WorkingDirectory(scmRoot));
             Heatmap heatmap = new Heatmap(hg, new FileWriter(outputFile()));
             heatmap.generate();
         } catch (IOException e) {

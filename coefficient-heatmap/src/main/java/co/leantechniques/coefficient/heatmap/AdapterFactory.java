@@ -1,21 +1,27 @@
 package co.leantechniques.coefficient.heatmap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 public class AdapterFactory {
 
-    public static final HashMap<String,Class<? extends ScmAdapter>> SUPPORTED_ADAPTERS = new HashMap<String, Class<? extends ScmAdapter>>();
+    public static final HashMap<String,Class<? extends CodeRepository>> SUPPORTED_ADAPTERS = new HashMap<String, Class<? extends CodeRepository>>();
 
     static {
-        SUPPORTED_ADAPTERS.put("hg", Mercurial.class);
+        SUPPORTED_ADAPTERS.put("hg", MercurialCodeRepository.class);
     }
 
-    public ScmAdapter adapterFor(String scmAdapter) {
+    public CodeRepository adapterFor(WorkingDirectory workingDirectory)
+    {
         try {
-            return SUPPORTED_ADAPTERS.get(scmAdapter.toLowerCase()).newInstance();
+            return SUPPORTED_ADAPTERS.get(workingDirectory.getRepoDirectoryName().toLowerCase()).getDeclaredConstructor(WorkingDirectory.class).newInstance(workingDirectory);
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,23 +1,38 @@
 package co.leantechniques.coefficient.heatmap;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ChangesetAnalyzerTest {
 
     private Map<String,Set<String>> results;
     private ChangesetAnalyzer analyzer;
+    private CommitInfoBuilder builder;
+    private CodeRepository mockRepository;
+    private Set<Commit> givenCommits;
+
+    @Before
+    public void setUp() throws Exception {
+        builder = CommitInfoBuilder.create();
+        mockRepository = mock(CodeRepository.class);
+        analyzer = new ChangesetAnalyzer(mockRepository);
+        givenCommits = new HashSet<Commit>();
+        when(mockRepository.getCommits()).thenReturn(givenCommits);
+    }
 
     @Test
     public void organizesCommitsByStory() throws Exception {
-        String commit = logLine("joesmith||US1234 Some hokey Message||File1.java");
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        givenCommits.add(builder.author("joesmith").description("US1234 Some hokey Message").addFiles("File1.java").toCommit());
+        
         results = analyzer.groupChangesetsByStory();
 
         assertTrue(assertStoryPresent("US1234"));
@@ -26,8 +41,9 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void isntConfusedByEmbeddedNewlines() throws Exception {
-        String commit = logLine("joesmith||US1234 Some hokey Message||File1.java".replaceAll(" ", System.getProperty("line.separator")));
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        String descriptionWithNewLines = "US1234 Some hokey Message".replaceAll(" ", System.getProperty("line.separator"));
+        givenCommits.add(builder.author("joesmith").description(descriptionWithNewLines).addFiles("File1.java").toCommit());
+
         results = analyzer.groupChangesetsByStory();
 
         assertTrue(assertStoryPresent("US1234"));
@@ -36,11 +52,10 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void multipleFilesetsForTheSameStoryAreAggregated() throws Exception {
-        String commit = logLine("joesmith||US1234 Some message||File1.java") +
-                        logLine("joesmith||US1234 Some other message||File2.java") +
-                        logLine("joesmith||US1234 Some other message||File1.java File3.java");
+        givenCommits.add(builder.author("joesmith").description("US1234 Some message").addFiles("File1.java").toCommit());
+        givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File2.java").toCommit());
+        givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File1.java","File3.java").toCommit());
 
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
         assertEquals(3, results.get("US1234").size());
@@ -61,11 +76,10 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void groupChangesetsByAuthor(){
-        String commit = logLine("joe smith||US1234 Some message||File1.java") +
-                logLine("joe smith||US1234 Some other message||File2.java") +
-                logLine("peter smith||US1234 Some other message||File1.java File3.java");
+        givenCommits.add(builder.author("joe smith").description("US1234 Some message").addFiles("File1.java").toCommit());
+        givenCommits.add(builder.author("joe smith").description("US1234 Some other message").addFiles("File2.java").toCommit());
+        givenCommits.add(builder.author("peter smith").description("US1234 Some other message").addFiles("File1.java", "File3.java").toCommit());
 
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         Map<String, Set<Commit>> resultsByAuthor = analyzer.groupByAuthor();
         
         assertEquals(2, resultsByAuthor.get("joe smith").size());
@@ -74,19 +88,11 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void handlesMergeCommitsWithoutFiles(){
-        String commit = logLine("joesmith||Merge||");
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
-        results = analyzer.groupChangesetsByStory();
+   		givenCommits.add(builder.author("joe smith").description("Merge").toCommit());
+        
+		results = analyzer.groupChangesetsByStory();
 
         assertTrue(results.get("Unknown").size() == 0);
-    }
-
-    private String logLine(String logText) {
-        return logText + System.getProperty("line.separator");
-    }
-
-    private ByteArrayInputStream streamFrom(String commit) {
-        return new ByteArrayInputStream(commit.getBytes());
     }
 
     private boolean assertStoryPresent(String story) {

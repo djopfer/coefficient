@@ -1,76 +1,25 @@
 package co.leantechniques.coefficient.heatmap;
 
-import java.io.InputStream;
 import java.util.*;
 
-import static java.util.regex.Pattern.quote;
-
 public class ChangesetAnalyzer {
-    private final Scanner scanner;
-    private final String messageSeparator;
-    private final String filesSeparator;
+    private final CodeRepository codeRepository;
 
-    public ChangesetAnalyzer(InputStream commitData, String endOfMessageSeparator, String filesSeparator) {
-        scanner = new Scanner(commitData);
-        messageSeparator = endOfMessageSeparator;
-        this.filesSeparator = filesSeparator;
+    public ChangesetAnalyzer(CodeRepository codeRepository) {
+        this.codeRepository = codeRepository;
     }
 
     public Map<String, Set<String>> groupChangesetsByStory() {
-        HashMap<String, Set<String>> map = new HashMap<String, Set<String>>();
-        while (hasMoreCommits()) {
-            Commit commit = createFrom(nextCommit());
-            if (map.containsKey(commit.getStory()))
-                map.get(commit.getStory()).addAll(commit.getFiles());
-            else
-                map.put(commit.getStory(), commit.getFiles());
-        }
-        return map;
-    }
-
-    private Commit createFrom(String message) {
-        while(!doneReadingCommitMessage(message)){
-            message += nextCommit();
-        }
-        String[] commitData = breakOnMessageSeparator(message);
-        if(containsFileList(commitData))
-            return new Commit(commitData[0], commitData[1], commitData[2].split(filesSeparator));
-        else
-            return new Commit(commitData[0], commitData[1]);
-    }
-
-    private boolean containsFileList(String[] commitData) {
-        return (commitData.length == 3);
-    }
-
-    private boolean doneReadingCommitMessage(String message) {
-        return message.matches("(.*)\\|\\|(.*)\\|\\|(.*)");
-    }
-
-    private String[] breakOnMessageSeparator(String message) {
-        return message.split(quote(messageSeparator));
-    }
-
-    private String nextCommit() {
-        return scanner.nextLine();
-    }
-
-    private boolean hasMoreCommits() {
-        return scanner.hasNextLine();
+        Set<Commit> commits = codeRepository.getCommits();
+        return new CommitMetric().filesByStory(commits);
     }
 
     public Map<String, Set<Commit>> groupByAuthor() {
-        HashMap<String, Set<Commit>> commitsByAuthor = new HashMap<String, Set<Commit>>();
-        while (hasMoreCommits()) {
-            Commit commit = createFrom(nextCommit());
-            if (commitsByAuthor.containsKey(commit.getAuthor()))
-                commitsByAuthor.get(commit.getAuthor()).add(commit);
-            else {
-                Set<Commit> commitSet = new HashSet<Commit>();
-                commitSet.add(commit);
-                commitsByAuthor.put(commit.getAuthor(), commitSet);
-            }
-        }
-        return commitsByAuthor;
+        Set<Commit> commits = codeRepository.getCommits();
+        return new CommitMetric().commitsByAuthor(commits);
+    }
+
+    public TestReport getRankReport() {
+        return new CommitMetric().getReport(codeRepository.getCommits());
     }
 }

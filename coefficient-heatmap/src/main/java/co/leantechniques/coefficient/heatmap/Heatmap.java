@@ -7,17 +7,17 @@ import java.util.Map;
 import java.util.Set;
 
 public class Heatmap {
-    private ScmAdapter hgLog;
     private Writer writer;
+    private CodeRepository codeRepository;
 
-    public Heatmap(ScmAdapter log, Writer writer) {
-        hgLog = log;
+    public Heatmap(CodeRepository codeRepository, Writer writer) {
+        this.codeRepository = codeRepository;
         this.writer = writer;
     }
 
     public String generate() {
         try {
-            ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(hgLog.execute(), "||", "\\s+");
+            ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(codeRepository);
             Map<String, ChangeInfo> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
             String results = render(files);
             save(results);
@@ -63,5 +63,4 @@ public class Heatmap {
     private void incrementCountForFile(Map<String, ChangeInfo> r, String file) {
         r.get(file).changedForStory();
     }
-
 }

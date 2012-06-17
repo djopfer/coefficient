@@ -18,6 +18,7 @@ public class Commit {
     }
 
     public String getStory() {
+        if(message == null) return "Unknown";
         Matcher matcher = Pattern.compile("(US|DE)\\d+").matcher(message);
         boolean wasFound = matcher.find();
         if (wasFound)
@@ -33,4 +34,14 @@ public class Commit {
     public String getAuthor() {
         return author;
     }
+
+    public boolean containsTests() {
+        for(String fileName : files){
+            if(fileName.toLowerCase().endsWith("test.java")){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

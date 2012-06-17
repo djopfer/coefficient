@@ -5,7 +5,10 @@ import org.junit.Test;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class CommitTest {
     @Test
@@ -27,5 +30,26 @@ public class CommitTest {
         assertTrue(filesCommitted.contains("File1.java"));
         assertTrue(filesCommitted.contains("File2.java"));
         assertTrue(filesCommitted.contains("File3.java"));
+    }
+    
+    @Test
+    public void knowsWhenCommitContainsATest(){
+        Commit commitWithTest = new Commit(null, null, "File1.java", "File1Test.java");
+        
+        assertTrue(commitWithTest.containsTests());
+    }
+
+    @Test
+    public void knowsWhenCommitNotTested(){
+        Commit commitWithTest = new Commit(null, null, "File1.java");
+
+        assertFalse(commitWithTest.containsTests());
+    }
+
+    @Test
+    public void getStoryHandlesNulls(){
+        Commit commitWithTest = new Commit(null, null, "File1.java");
+
+        assertThat(commitWithTest.getStory(), notNullValue());
     }
 }
