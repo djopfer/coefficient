@@ -63,6 +63,15 @@ public class ChangesetAnalyzerTest {
         assertEquals(1, resultsByAuthor.get("peter smith").size());
     }
 
+    @Test
+    public void handlesMergeCommitsWithoutFiles(){
+        String commit = logLine("joesmith||Merge||");
+        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        results = analyzer.groupChangesetsByStory();
+
+        assertTrue(results.get("Unknown").size() == 0);
+    }
+
     private String logLine(String logText) {
         return logText + System.getProperty("line.separator");
     }
