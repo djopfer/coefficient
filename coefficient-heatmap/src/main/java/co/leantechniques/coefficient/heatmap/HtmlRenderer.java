@@ -26,8 +26,9 @@ public class HtmlRenderer {
                          "<head>" +
                             "<title>SCM Heatmap</title>" +
                             "<style type='text/css'>" +
-                                "body { font-family: sans-serif; color: lightgrey; }" +
-                                "ol li { display: inline; margin: 2px; }" +
+                                "body { font-family: sans-serif; color: lightgrey; padding: 0px; margin: 0px; }" +
+                                "ol { margin: 0px; padding: 20px; }" +
+                                "ol li { display: inline-block; margin: 2px; }" +
                             "</style>" +
                          "</head>" +
                          "<body>" +

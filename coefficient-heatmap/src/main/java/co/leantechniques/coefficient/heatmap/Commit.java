@@ -16,7 +16,7 @@ public class Commit {
     }
 
     public String getStory() {
-        Matcher matcher = Pattern.compile("US\\d+").matcher(message);
+        Matcher matcher = Pattern.compile("(US|DE)\\d+").matcher(message);
         boolean wasFound = matcher.find();
         if (wasFound)
             return matcher.group();

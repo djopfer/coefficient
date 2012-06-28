@@ -49,6 +49,16 @@ public class ChangesetAnalyzerTest {
         assertTrue(results.get("US1234").contains("File3.java"));
     }
 
+    @Test
+    public void treatsDefectsAsStories() throws Exception {
+        String commit = logLine("DE1234 Some Message||File1.java");
+        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        results = analyzer.groupChangesetsByStory();
+
+        assertTrue(assertStoryPresent("DE1234"));
+        assertTrue(results.get("DE1234").contains("File1.java"));
+    }
+
     private String logLine(String logText) {
         return logText + System.getProperty("line.separator");
     }

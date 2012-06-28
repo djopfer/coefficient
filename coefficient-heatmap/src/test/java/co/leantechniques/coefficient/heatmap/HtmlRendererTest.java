@@ -12,59 +12,65 @@ import static org.junit.Assert.assertTrue;
 public class HtmlRendererTest {
 
     private Map<String, Integer> changes;
+    private TreeMap<String, ChangeInfo> newchanges;
 
     @Before
     public void setUp() {
         changes = new TreeMap<String, Integer>();
+        newchanges = new TreeMap<String, ChangeInfo>();
     }
 
 
     @Test
     public void generatesTheCloudInHtml() {
-        changes.put("AbstractChainOfResponsibilityFactory.java", 1);
+        numberOfChangesFor("AbstractChainOfResponsibilityFactory.java", 1);
         assertMatches("<html><head>(.*)</head><body><ol>(.*)</ol></body></html>", render(changes));
     }
 
     @Test
     public void ordersTheTagCloudBasedOnFilename() {
-        changes = new TreeMap<String, Integer>();
-        changes.put("AbstractChainOfResponsibilityFactory.java", 1);
-        changes.put("ZumbaTraining.java", 1);
-        changes.put("BasicChainOfResponsibilityFactory.java", 1);
+        numberOfChangesFor("AbstractChainOfResponsibilityFactory.java", 1);
+        numberOfChangesFor("ZumbaTraining.java", 1);
+        numberOfChangesFor("BasicChainOfResponsibilityFactory.java", 1);
 
         assertMatches(".*AbstractChainOfResponsibilityFactory.*BasicChainOfResponsibilityFactory.*ZumbaTraining.*", render(changes));
     }
 
+    private void numberOfChangesFor(String filename, int numberOfChanges) {
+        changes.put(filename, numberOfChanges);
+        ChangeInfo changeInfo = new ChangeInfo();
+        for(int i = 0; i < numberOfChanges; i++) {
+            changeInfo.changedForStory();
+        }
+        newchanges.put(filename, changeInfo);
+    }
+
     @Test
     public void rendersEachFileAsATag() {
-        HashMap<String, Integer> changes = new HashMap<String, Integer>();
-        changes.put("ChangeSet.java", 1);
+        numberOfChangesFor("ChangeSet.java", 1);
 
         assertMatches("<li .+>ChangeSet</li>", render(changes));
     }
 
     @Test
     public void onlyShowsBaseFilenameForEachTag() {
-        HashMap<String, Integer> changes = new HashMap<String, Integer>();
-        changes.put("src/main/java/com/example/ChangeSet.java", 1);
+        numberOfChangesFor("src/main/java/com/example/ChangeSet.java", 1);
 
         assertMatches("<li(.+)>ChangeSet</li>", render(changes));
     }
 
     @Test
     public void addsFileDetailsToTheTitleAttributeForDisplayWhenHoveredOver() {
-        HashMap<String, Integer> changes = new HashMap<String, Integer>();
-        changes.put("src/main/java/com/example/ChangeSet.java", 1);
+        numberOfChangesFor("src/main/java/com/example/ChangeSet.java", 1);
 
         assertMatches("title='src/main/java/com/example/ChangeSet.java'", render(changes));
     }
 
     @Test
     public void adjustsTheFontSizeOfEachTagRelativeToTheNumberOfChangesInTheFile() {
-        Map<String, Integer> changes = new HashMap<String, Integer>();
-        changes.put("src/main/java/com/example/NotChangedOften.java", 1);
-        changes.put("src/main/java/com/example/ChangedMoreOften.java", 6);
-        changes.put("src/main/java/com/example/AlwaysChanging.java", 12);
+        numberOfChangesFor("src/main/java/com/example/NotChangedOften.java", 1);
+        numberOfChangesFor("src/main/java/com/example/ChangedMoreOften.java", 6);
+        numberOfChangesFor("src/main/java/com/example/AlwaysChanging.java", 12);
 
         String html = render(changes);
 
@@ -75,10 +81,9 @@ public class HtmlRendererTest {
 
     @Test
     public void adjustsTheFontSizeRelativeToTheTotalNumberOfChanges() {
-        Map<String, Integer> changes = new HashMap<String, Integer>();
-        changes.put("src/main/java/com/example/NotChangedOften.java", 10);
-        changes.put("src/main/java/com/example/ChangedMoreOften.java", 15);
-        changes.put("src/main/java/com/example/AlwaysChanging.java", 20);
+        numberOfChangesFor("src/main/java/com/example/NotChangedOften.java", 10);
+        numberOfChangesFor("src/main/java/com/example/ChangedMoreOften.java", 15);
+        numberOfChangesFor("src/main/java/com/example/AlwaysChanging.java", 20);
 
         String html = render(changes);
 
