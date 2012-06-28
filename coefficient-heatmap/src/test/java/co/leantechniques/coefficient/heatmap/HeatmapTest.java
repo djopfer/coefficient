@@ -49,15 +49,12 @@ public class HeatmapTest {
         assertReportContains("File3.java");
     }
 
-    @Ignore
     @Test
     public void multipleCommitsForTheSameTicketAreTreatedAsSingleChange() {
         givenLogContains(commit("US1234 First message", "File1.java"),
                          commit("US1234 Second message", "File1.java"));
 
-        reportFromHg = heatmap.generate();
-
-        assertReportContains("<li style='foo'>File1.java</li>");
+        assertMatches("File1.java", heatmap.generate());
     }
 
     private void givenLogContains(String... commits) {
@@ -88,6 +85,14 @@ public class HeatmapTest {
         }
         commitData += System.getProperty("line.separator");
         return commitData;
+    }
+
+    private void assertMatches(String pattern, String target) {
+        assertTrue(assertionMessage(pattern, target), target.matches(".*" + pattern + ".*"));
+    }
+
+    private String assertionMessage(String pattern, String target) {
+        return "Expected <" + target + "> to match <" + pattern + ">";
     }
 
     private class NullWriter extends Writer {

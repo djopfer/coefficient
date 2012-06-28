@@ -18,7 +18,7 @@ public class Heatmap {
     public String generate() {
         try {
             ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(hgLog.execute(), "||", "\\s+");
-            Map<String, Integer> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
+            Map<String, ChangeInfo> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
             String results = render(files);
             save(results);
             return results;
@@ -27,7 +27,7 @@ public class Heatmap {
         }
     }
 
-    private String render(Map<String, Integer> files) {
+    private String render(Map<String, ChangeInfo> files) {
         return new HtmlRenderer(files).render();
     }
 
@@ -36,8 +36,8 @@ public class Heatmap {
         writer.close();
     }
 
-    private Map<String, Integer> changesPerFile(Map<String, Set<String>> changesets) {
-        Map<String, Integer> numberOfChangesOrganizedByFile = new HashMap<String, Integer>();
+    private Map<String, ChangeInfo> changesPerFile(Map<String, Set<String>> changesets) {
+        Map<String, ChangeInfo> numberOfChangesOrganizedByFile = new HashMap<String, ChangeInfo>();
         for (String story : changesets.keySet()) {
             for (String file : changesets.get(story)) {
                 if (fileExists(numberOfChangesOrganizedByFile, file)) {
@@ -50,16 +50,18 @@ public class Heatmap {
         return numberOfChangesOrganizedByFile;
     }
 
-    private boolean fileExists(Map<String, Integer> r, String file) {
+    private boolean fileExists(Map<String, ChangeInfo> r, String file) {
         return r.containsKey(file);
     }
 
-    private void initializeCount(Map<String, Integer> r, String file) {
-        r.put(file, 1);
+    private void initializeCount(Map<String, ChangeInfo> r, String file) {
+        ChangeInfo changeInfo = new ChangeInfo();
+        changeInfo.changedForStory();
+        r.put(file, changeInfo);
     }
 
-    private void incrementCountForFile(Map<String, Integer> r, String file) {
-        r.put(file, r.get(file) + 1);
+    private void incrementCountForFile(Map<String, ChangeInfo> r, String file) {
+        r.get(file).changedForStory();
     }
 
 }

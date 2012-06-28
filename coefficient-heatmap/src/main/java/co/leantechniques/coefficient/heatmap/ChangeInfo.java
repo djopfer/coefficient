@@ -6,4 +6,8 @@ public class ChangeInfo {
     public void changedForStory() {
         this.storyChanges++;
     }
+
+    public int getTotalChanges() {
+        return storyChanges;
+    }
 }

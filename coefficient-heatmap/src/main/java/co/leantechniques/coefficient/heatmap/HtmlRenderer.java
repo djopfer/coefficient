@@ -8,11 +8,11 @@ public class HtmlRenderer {
     public static final int DIFFERENCE_IN_TAG_SIZE = 3;
     public static final int NUMBER_OF_CLASSIFICATIONS = 10;
 
-    private Map<String, Integer> files;
+    private Map<String, ChangeInfo> files;
     private final float range;
     private final Integer floor;
 
-    public HtmlRenderer(Map<String, Integer> files) {
+    public HtmlRenderer(Map<String, ChangeInfo> files) {
         this.files = files;
         ArrayList changeCounts = sorted(files.values());
         floor = min(changeCounts);
@@ -41,8 +41,13 @@ public class HtmlRenderer {
                          "</html>";
     }
 
-    private ArrayList sorted(Collection<Integer> values) {
-        ArrayList list = new ArrayList(values);
+    private ArrayList sorted(Collection<ChangeInfo> values) {
+        ArrayList list = new ArrayList(values.size());
+
+        for(ChangeInfo changes : values) {
+            list.add(changes.getTotalChanges());
+        }
+
         Collections.sort(list);
         return list;
     }
@@ -60,7 +65,7 @@ public class HtmlRenderer {
     }
 
     private Integer numberOfChangesTo(String file) {
-        return files.get(file);
+        return files.get(file).getTotalChanges();
     }
 
     private String styleOf(int changeCount) {
