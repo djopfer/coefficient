@@ -9,8 +9,10 @@ import java.util.regex.Pattern;
 public class Commit {
     private String message;
     private final Set<String> files;
+    private final String author;
 
-    public Commit(String message, String... files) {
+    public Commit(String author, String message, String... files) {
+        this.author = author;
         this.files = new HashSet<String>(Arrays.asList(files));
         this.message = message;
     }
@@ -26,5 +28,9 @@ public class Commit {
 
     public Set<String> getFiles() {
         return files;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 }

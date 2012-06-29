@@ -28,7 +28,7 @@ public class Mercurial implements ScmAdapter {
         }
 
         public InputStream execute() {
-            cmdAppend("--template", "{desc}||{files}\\n");
+            cmdAppend("--template", "{author|user}||{desc}||{files}\\n");
             return this.launchStream();
         }
     }

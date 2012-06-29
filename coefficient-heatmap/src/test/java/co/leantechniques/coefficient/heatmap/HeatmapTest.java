@@ -79,7 +79,7 @@ public class HeatmapTest {
     }
 
     public static String commit(String message, String... files) {
-        String commitData = message + "||";
+        String commitData = "Author Name||" + message + "||";
         for (String filename : files) {
             commitData += (filename + " ");
         }

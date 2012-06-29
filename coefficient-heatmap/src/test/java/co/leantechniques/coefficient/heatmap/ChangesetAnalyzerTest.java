@@ -16,7 +16,7 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void organizesCommitsByStory() throws Exception {
-        String commit = logLine("US1234 Some honkey Message||File1.java");
+        String commit = logLine("joesmith||US1234 Some hokey Message||File1.java");
         analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
@@ -26,7 +26,7 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void isntConfusedByEmbeddedNewlines() throws Exception {
-        String commit = logLine("US1234 Some honkey Message||File1.java".replaceAll(" ", System.getProperty("line.separator")));
+        String commit = logLine("joesmith||US1234 Some hokey Message||File1.java".replaceAll(" ", System.getProperty("line.separator")));
         analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
@@ -36,9 +36,9 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void multipleFilesetsForTheSameStoryAreAggregated() throws Exception {
-        String commit = logLine("US1234 Some message||File1.java") +
-                        logLine("US1234 Some other message||File2.java") +
-                        logLine("US1234 Some other message||File1.java File3.java");
+        String commit = logLine("joesmith||US1234 Some message||File1.java") +
+                        logLine("joesmith||US1234 Some other message||File2.java") +
+                        logLine("joesmith||US1234 Some other message||File1.java File3.java");
 
         analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
@@ -51,12 +51,34 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void treatsDefectsAsStories() throws Exception {
-        String commit = logLine("DE1234 Some Message||File1.java");
+        String commit = logLine("Bob Smith||DE1234 Some Message||File1.java");
         analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
         assertTrue(assertStoryPresent("DE1234"));
         assertTrue(results.get("DE1234").contains("File1.java"));
+    }
+
+    @Test
+    public void groupChangesetsByAuthor(){
+        String commit = logLine("joe smith||US1234 Some message||File1.java") +
+                logLine("joe smith||US1234 Some other message||File2.java") +
+                logLine("peter smith||US1234 Some other message||File1.java File3.java");
+
+        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        Map<String, Set<Commit>> resultsByAuthor = analyzer.groupByAuthor();
+        
+        assertEquals(2, resultsByAuthor.get("joe smith").size());
+        assertEquals(1, resultsByAuthor.get("peter smith").size());
+    }
+
+    @Test
+    public void handlesMergeCommitsWithoutFiles(){
+        String commit = logLine("joesmith||Merge||");
+        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        results = analyzer.groupChangesetsByStory();
+
+        assertTrue(results.get("Unknown").size() == 0);
     }
 
     private String logLine(String logText) {
