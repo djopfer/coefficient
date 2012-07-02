@@ -2,9 +2,9 @@ package co.leantechniques.coefficient.heatmap;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Heatmap {
     private Writer writer;
@@ -13,12 +13,13 @@ public class Heatmap {
     public Heatmap(CodeRepository codeRepository, Writer writer) {
         this.codeRepository = codeRepository;
         this.writer = writer;
-    }
-
-    public String generate() {
+	}
+    
+	public String generate() {
         try {
             ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(codeRepository);
-            Map<String, ChangeInfo> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
+//            Map<String, ChangeInfo> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
+            Map<String, HeatmapData> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
             String results = render(files);
             save(results);
             return results;
@@ -27,7 +28,7 @@ public class Heatmap {
         }
     }
 
-    private String render(Map<String, ChangeInfo> files) {
+    private String render(Map<String, HeatmapData> files) {
         return new HtmlRenderer(files).render();
     }
 
@@ -36,31 +37,50 @@ public class Heatmap {
         writer.close();
     }
 
-    private Map<String, ChangeInfo> changesPerFile(Map<String, Set<String>> changesets) {
-        Map<String, ChangeInfo> numberOfChangesOrganizedByFile = new HashMap<String, ChangeInfo>();
+    private Map<String, HeatmapData> changesPerFile(Map<String, Set<String>> changesets) {
+        Map<String, HeatmapData> numberOfChangesOrganizedByFile = new HashMap<String, HeatmapData>();
+        boolean isDefect;
         for (String story : changesets.keySet()) {
+            isDefect = isDefect(story);
             for (String file : changesets.get(story)) {
-                if (fileExists(numberOfChangesOrganizedByFile, file)) {
-                    incrementCountForFile(numberOfChangesOrganizedByFile, file);
-                } else {
-                    initializeCount(numberOfChangesOrganizedByFile, file);
-                }
+//                if (includes.contains(GetFileExtension(file))) {
+                    if (fileExists(numberOfChangesOrganizedByFile, file)) {
+                        incrementChangeCountForFile(numberOfChangesOrganizedByFile, file, isDefect);
+                    } else {
+                        initializeCount(numberOfChangesOrganizedByFile, file, isDefect);
+                    }
+//                }
             }
         }
         return numberOfChangesOrganizedByFile;
     }
 
-    private boolean fileExists(Map<String, ChangeInfo> r, String file) {
+    private boolean fileExists(Map<String, HeatmapData> r, String file) {
         return r.containsKey(file);
     }
 
-    private void initializeCount(Map<String, ChangeInfo> r, String file) {
-        ChangeInfo changeInfo = new ChangeInfo();
-        changeInfo.changedForStory();
-        r.put(file, changeInfo);
+    private void initializeCount(Map<String, HeatmapData> r, String file, boolean isDefect) {
+        HeatmapData heatmapdata = new HeatmapData();
+        heatmapdata.changes = 1;
+        if (isDefect) {
+            heatmapdata.defects = 1;
+        }
+        else{
+            heatmapdata.defects = 0;
+        }
+        r.put(file, heatmapdata);
+    }
+    public boolean isDefect(String story) {
+        Matcher matcher = Pattern.compile("DE\\d+").matcher(story);
+        return matcher.find();
     }
 
-    private void incrementCountForFile(Map<String, ChangeInfo> r, String file) {
-        r.get(file).changedForStory();
+    private void incrementChangeCountForFile(Map<String, HeatmapData> r, String file, boolean isDefect) {
+        HeatmapData heatmapData = r.get(file);
+        heatmapData.changes++;
+        if (isDefect) {
+            heatmapData.defects++;
+        }
     }
+
 }

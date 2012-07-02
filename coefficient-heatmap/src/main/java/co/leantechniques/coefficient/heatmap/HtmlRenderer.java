@@ -8,46 +8,42 @@ public class HtmlRenderer {
     public static final int DIFFERENCE_IN_TAG_SIZE = 3;
     public static final int NUMBER_OF_CLASSIFICATIONS = 10;
 
-    private Map<String, ChangeInfo> files;
+    private Map<String, HeatmapData> files;
     private final float range;
     private final Integer floor;
 
-    public HtmlRenderer(Map<String, ChangeInfo> files) {
+    public HtmlRenderer(Map<String, HeatmapData> files) {
         this.files = files;
         ArrayList changeCounts = sorted(files.values());
         floor = min(changeCounts);
         range = max(changeCounts) - floor;
     }
 
-
-
     public String render() {
         String heatmap = "<html>" +
-                         "<head>" +
-                            "<title>SCM Heatmap</title>" +
-                            "<style type='text/css'>" +
-                                "body { font-family: sans-serif; color: lightgrey; padding: 0px; margin: 0px; }" +
-                                "ol { margin: 0px; padding: 20px; }" +
-                                "ol li { display: inline-block; margin: 2px; }" +
-                            "</style>" +
-                         "</head>" +
-                         "<body>" +
-                            "<ol>";
+                "<head>" +
+                "<title>SCM Heatmap</title>" +
+                "<style type='text/css'>" +
+                "body { font-family: sans-serif; padding: 0; margin: 0; }" +
+                "ol { margin: 0; padding: 20px; }" +
+                "ol li { display: inline-block; margin: 2px; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<ol>";
         for (String file : sorted(files.keySet())) {
             heatmap += tagFor(file);
         }
         return heatmap +    "</ol>" +
-                         "</body>" +
-                         "</html>";
+                "</body>" +
+                "</html>";
     }
 
-    private ArrayList sorted(Collection<ChangeInfo> values) {
-        ArrayList list = new ArrayList(values.size());
-
-        for(ChangeInfo changes : values) {
-            list.add(changes.getTotalChanges());
+    private ArrayList sorted(Collection<HeatmapData> values) {
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        for(HeatmapData changeData : values) {
+            list.add(changeData.changes);
         }
-
         Collections.sort(list);
         return list;
     }
@@ -61,19 +57,34 @@ public class HtmlRenderer {
     }
 
     private String tagFor(String file) {
-        return "<li " + styleOf(numberOfChangesTo(file)) + " title='" + file + "'>" + baseNameOf(file) + "</li>";
+        return "<li " + styleOf(numberOfChangesTo(file),numberOfDefectsFor(file)) + " title='" + file + " -> " +
+                "Changes: " + numberOfChangesTo(file) +
+                "  Defects: " + numberOfDefectsFor(file) + "'>" + baseNameOf(file) + "</li>";
     }
 
     private Integer numberOfChangesTo(String file) {
-        return files.get(file).getTotalChanges();
+        return files.get(file).changes;
     }
 
-    private String styleOf(int changeCount) {
-        return "style='font-size: " + calculatedSizeFor(changeCount) + "'";
+    private Integer numberOfDefectsFor(String file) {
+        return files.get(file).defects;
+    }
+
+    private String styleOf(int changeCount, int defectCount) {
+        return "style='font-size: " + calculatedSizeFor(changeCount) + ";color: " + calculateColorFor(changeCount, defectCount) + "'";
     }
 
     private int calculatedSizeFor(int changeCount) {
         return MINIMUM_SIZE + adjustedSize(changeCount);
+    }
+
+    private String calculateColorFor(int changeCount, int defectCount) {
+        double percentOfDefects = ((double) defectCount) / changeCount;
+        int red = (int)(percentOfDefects * 255);
+        if (red == 0)
+            return "rgb(211,211,211)";
+        else
+            return "rgb(" + red + ",0,0)";
     }
 
     private int adjustedSize(int changeCount) {

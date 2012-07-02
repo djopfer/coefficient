@@ -46,8 +46,24 @@ public class MercurialCodeRepository implements CodeRepository {
         }
 
         public InputStream execute() {
+
+            noMerges();
             cmdAppend("--template", "{author|user}||{desc}||{files}\\n");
             return this.launchStream();
         }
+//        @Override
+//        public InputStream execute(Integer daystoinclude) {
+//            Date now = new Date();
+//            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//            Calendar cal = Calendar.getInstance();
+//            cal.add(Calendar.DATE, -daystoinclude);
+//            String logDateRange = df.format(cal.getTime()) + " to " + df.format(now);
+//            date(logDateRange);
+//            noMerges();
+//            cmdAppend("--template", "{desc}||{files}\\n");
+//            return this.launchStream();
+//        }
+
+
     }
 }

@@ -11,69 +11,69 @@ import static org.junit.Assert.assertTrue;
 
 public class HtmlRendererTest {
 
-    private Map<String, ChangeInfo> changes;
+    private Map<String, HeatmapData> changes;
 
     @Before
     public void setUp() {
-        changes = new TreeMap<String, ChangeInfo>();
+        changes = new TreeMap<String, HeatmapData>();
     }
-
 
     @Test
     public void generatesTheCloudInHtml() {
-        String filename = "AbstractChainOfResponsibilityFactory.java";
-        int numberOfChanges = 1;
-        numberOfChangesFor2(filename, numberOfChanges);
+        initializeChanges("AbstractChainOfResponsibilityFactory.java", 1, 0);
         assertMatches("<html><head>(.*)</head><body><ol>(.*)</ol></body></html>", render(changes));
     }
 
-    private void numberOfChangesFor2(String filename, int numberOfChanges) {
-        numberOfChangesFor(filename, numberOfChanges);
+    private void initializeChanges(String filename, int totalNumberOfChanges, int totalNumberOfDefects) {
+        HeatmapData heatmapData = new HeatmapData();
+        heatmapData.changes = totalNumberOfChanges;
+        heatmapData.defects = totalNumberOfDefects;
+        changes.put(filename, heatmapData);
     }
 
     @Test
     public void ordersTheTagCloudBasedOnFilename() {
-        numberOfChangesFor2("AbstractChainOfResponsibilityFactory.java", 1);
-        numberOfChangesFor2("ZumbaTraining.java", 1);
-        numberOfChangesFor2("BasicChainOfResponsibilityFactory.java", 1);
+        initializeChanges("AbstractChainOfResponsibilityFactory.java", 1, 0);
+        initializeChanges("ZumbaTraining.java", 1, 0);
+        initializeChanges("BasicChainOfResponsibilityFactory.java", 1, 0);
 
         assertMatches(".*AbstractChainOfResponsibilityFactory.*BasicChainOfResponsibilityFactory.*ZumbaTraining.*", render(changes));
     }
 
-    private void numberOfChangesFor(String filename, int numberOfChanges) {
-        ChangeInfo changeInfo = new ChangeInfo();
-        for(int i = 0; i < numberOfChanges; i++) {
-            changeInfo.changedForStory();
-        }
-        changes.put(filename, changeInfo);
-    }
+//    private void numberOfChangesFor(String filename, int numberOfChanges) {
+//        ChangeInfo changeInfo = new ChangeInfo();
+//        for(int i = 0; i < numberOfChanges; i++) {
+//            changeInfo.changedForStory();
+//        }
+//        changes.put(filename, changeInfo);
+//    }
 
     @Test
     public void rendersEachFileAsATag() {
-        numberOfChangesFor2("ChangeSet.java", 1);
+        initializeChanges("ChangeSet.java", 1, 0);
 
         assertMatches("<li .+>ChangeSet</li>", render(changes));
     }
 
     @Test
     public void onlyShowsBaseFilenameForEachTag() {
-        numberOfChangesFor2("src/main/java/com/example/ChangeSet.java", 1);
+        initializeChanges("src/main/java/com/example/ChangeSet.java", 1, 0);
 
         assertMatches("<li(.+)>ChangeSet</li>", render(changes));
     }
 
     @Test
     public void addsFileDetailsToTheTitleAttributeForDisplayWhenHoveredOver() {
-        numberOfChangesFor2("src/main/java/com/example/ChangeSet.java", 1);
+        initializeChanges("src/main/java/com/example/ChangeSet.java", 1, 0);
 
-        assertMatches("title='src/main/java/com/example/ChangeSet.java'", render(changes));
+        assertMatches("title='src/main/java/com/example/ChangeSet.java -> Changes: 1  Defects: 0'", render(changes));
     }
 
     @Test
     public void adjustsTheFontSizeOfEachTagRelativeToTheNumberOfChangesInTheFile() {
-        numberOfChangesFor2("src/main/java/com/example/NotChangedOften.java", 1);
-        numberOfChangesFor2("src/main/java/com/example/ChangedMoreOften.java", 6);
-        numberOfChangesFor2("src/main/java/com/example/AlwaysChanging.java", 12);
+        initializeChanges("src/main/java/com/example/NotChangedOften.java", 1, 0);
+        initializeChanges("src/main/java/com/example/ChangedMoreOften.java", 6, 0);
+        initializeChanges("src/main/java/com/example/AlwaysChanging.java", 12, 0);
 
         String html = render(changes);
 
@@ -84,9 +84,9 @@ public class HtmlRendererTest {
 
     @Test
     public void adjustsTheFontSizeRelativeToTheTotalNumberOfChanges() {
-        numberOfChangesFor2("src/main/java/com/example/NotChangedOften.java", 10);
-        numberOfChangesFor2("src/main/java/com/example/ChangedMoreOften.java", 15);
-        numberOfChangesFor2("src/main/java/com/example/AlwaysChanging.java", 20);
+        initializeChanges("src/main/java/com/example/NotChangedOften.java", 10, 0);
+        initializeChanges("src/main/java/com/example/ChangedMoreOften.java", 15, 0);
+        initializeChanges("src/main/java/com/example/AlwaysChanging.java", 20, 0);
 
         String html = render(changes);
 
@@ -96,14 +96,16 @@ public class HtmlRendererTest {
     }
 
     @Test
-    public void adjustsTheFontColorOfEachTagBasedOnTheNumberOfChangesThatWereDefects() {
-//    file_with( :changes => 3 ).should have_color('0, 255, 0')
-//
-//    file_with( :changes => 3,
-//    :defects => 3 ).should have_color('255, 0, 0')
-//
-//    file_with( :changes => 10,
-//    :defects => 5 ).should have_color('127, 128, 0')
+    public void adjustsTheColorOfEachTagBasedOnTheNumberOfChangesThatWereDefects() {
+        initializeChanges("src/main/java/com/example/NoDefects.java", 10, 0);
+        initializeChanges("src/main/java/com/example/MinimalDefects.java", 15, 3);
+        initializeChanges("src/main/java/com/example/ManyDefects.java", 20, 15);
+
+        String html = render(changes);
+
+        assertMatches("211,211,211", html);
+        assertMatches("51,0,0", html);
+        assertMatches("191,0,0", html);
     }
 
     private void assertMatches(String pattern, String target) {
@@ -114,7 +116,7 @@ public class HtmlRendererTest {
         return "Expected <" + target + "> to match <" + pattern + ">";
     }
 
-    private String render(Map<String, ChangeInfo> changes) {
+    private String render(Map<String, HeatmapData> changes) {
         return new HtmlRenderer(changes).render();
     }
 }

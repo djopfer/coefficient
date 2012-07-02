@@ -1,7 +1,6 @@
 package co.leantechniques.coefficient.heatmap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,7 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +58,9 @@ public class HeatmapTest {
                 builder.author("tim").description("US1234 First message").addFiles("File1.java").toCommit(),
                 builder.author("tim").description("US1234 Second message").addFiles("File1.java").toCommit());
 
-        assertMatches("File1.java", heatmap.generate());
+        reportFromHg = heatmap.generate();
+
+        assertReportContains("File1.java -> Changes: 1  Defects: 0");
     }
 
     private void givenLogContains(Commit... commits) {
@@ -76,7 +78,7 @@ public class HeatmapTest {
     }
 
     private void assertReportContains(String filename) {
-        assertTrue(reportFromHg.contains(filename));
+        assertThat(reportFromHg, containsString(filename));
     }
 
     private class NullWriter extends Writer {

@@ -3,12 +3,10 @@ package co.leantechniques.coefficient.heatmap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,8 +64,9 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void treatsDefectsAsStories() throws Exception {
-        String commit = logLine("Bob Smith||DE1234 Some Message||File1.java");
-        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
+        givenCommits.add(builder.author("Bob Smith").description("DE1234 Some message").addFiles("File1.java").toCommit());
+//        String commit = logLine("Bob Smith||DE1234 Some Message||File1.java");
+//        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
         assertTrue(assertStoryPresent("DE1234"));
