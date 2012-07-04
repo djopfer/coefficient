@@ -9,17 +9,12 @@ public class ChangesetAnalyzer {
         this.codeRepository = codeRepository;
     }
 
-    public Map<String, Set<String>> groupChangesetsByStory() {
+    public Map<String, Set<String>> getFilesByStory() {
         Set<Commit> commits = codeRepository.getCommits();
-        return new CommitMetric().filesByStory(commits);
+        return new Commitset(commits).filesByStory();
     }
 
-//    public Map<String, Set<Commit>> groupByAuthor() {
-//        Set<Commit> commits = codeRepository.getCommits();
-//        return new CommitMetric().commitsByAuthor(commits);
-//    }
-
-    public CommitsetStatistic getRankReport() {
-        return new CommitMetric().getReport(codeRepository.getCommits());
+    public AuthorStatisticSet getRankReport() {
+        return new Commitset(codeRepository.getCommits()).getAuthorStatistics();
     }
 }

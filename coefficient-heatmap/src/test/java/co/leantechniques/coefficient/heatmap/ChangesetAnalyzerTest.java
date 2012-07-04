@@ -31,7 +31,7 @@ public class ChangesetAnalyzerTest {
     public void organizesCommitsByStory() throws Exception {
         givenCommits.add(builder.author("joesmith").description("US1234 Some hokey Message").addFiles("File1.java").toCommit());
         
-        results = analyzer.groupChangesetsByStory();
+        results = analyzer.getFilesByStory();
 
         assertTrue(assertStoryPresent("US1234"));
         assertTrue(results.get("US1234").contains("File1.java"));
@@ -42,7 +42,7 @@ public class ChangesetAnalyzerTest {
         String descriptionWithNewLines = "US1234 Some hokey Message".replaceAll(" ", System.getProperty("line.separator"));
         givenCommits.add(builder.author("joesmith").description(descriptionWithNewLines).addFiles("File1.java").toCommit());
 
-        results = analyzer.groupChangesetsByStory();
+        results = analyzer.getFilesByStory();
 
         assertTrue(assertStoryPresent("US1234"));
         assertTrue(results.get("US1234").contains("File1.java"));
@@ -54,7 +54,7 @@ public class ChangesetAnalyzerTest {
         givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File2.java").toCommit());
         givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File1.java","File3.java").toCommit());
 
-        results = analyzer.groupChangesetsByStory();
+        results = analyzer.getFilesByStory();
 
         assertEquals(3, results.get("US1234").size());
         assertTrue(results.get("US1234").contains("File1.java"));
@@ -65,7 +65,7 @@ public class ChangesetAnalyzerTest {
     @Test
     public void treatsDefectsAsStories() throws Exception {
         givenCommits.add(builder.author("Bob Smith").description("DE1234 Some message").addFiles("File1.java").toCommit());
-        results = analyzer.groupChangesetsByStory();
+        results = analyzer.getFilesByStory();
 
         assertTrue(assertStoryPresent("DE1234"));
         assertTrue(results.get("DE1234").contains("File1.java"));
@@ -87,7 +87,7 @@ public class ChangesetAnalyzerTest {
     public void handlesMergeCommitsWithoutFiles(){
    		givenCommits.add(builder.author("joe smith").description("Merge").toCommit());
         
-		results = analyzer.groupChangesetsByStory();
+		results = analyzer.getFilesByStory();
 
         assertTrue(results.get("Unknown").size() == 0);
     }

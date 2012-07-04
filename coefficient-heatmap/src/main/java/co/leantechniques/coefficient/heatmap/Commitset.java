@@ -2,62 +2,26 @@ package co.leantechniques.coefficient.heatmap;
 
 import java.util.*;
 
+// ChangesetAnalyzer?
 public class Commitset {
 
-    private Iterable<Commit> commits;
-    private final CommitsetStatistic commitsetStatistic = new CommitsetStatistic();
+    private final Iterable<Commit> commits;
 
     public Commitset(Iterable<Commit> commits) {
         this.commits = commits;
     }
 
-
-    public int getTotalCommits() {
-        return commitsetStatistic.getTotalCommits();
-    }
-
-    public int getTotalTestedCommits() {
-        return commitsetStatistic.getTotalTestedCommits();
-    }
-
-    public List<AuthorCommitStatistic> getCommitStatistics() {
-        return commitsetStatistic.getCommitStatistics();
-    }
-
-    public void incrementTotalCommits() {
-        commitsetStatistic.incrementTotalCommits();
-    }
-
-    public void incrementTestedCommits() {
-        commitsetStatistic.incrementTestedCommits();
-    }
-
-    public AuthorCommitStatistic getAuthorByName(String author) {
-        return commitsetStatistic.getAuthorByName(author);
-    }
-
-    public void setTotalCommits(int totalCommits) {
-        commitsetStatistic.setTotalCommits(totalCommits);
-    }
-
-    public double getPercentageOfTestedCommits() {
-        return commitsetStatistic.getPercentageOfTestedCommits();
-    }
-
-
-
-
-
-    public CommitsetStatistic getReport() {
+    public AuthorStatisticSet getAuthorStatistics() {
+        AuthorStatisticSet authorStatisticSet = new AuthorStatisticSet();
         for(Commit commit : commits){
-            commitsetStatistic.getAuthorByName(commit.getAuthor()).incrementTotalCommits();
-            commitsetStatistic.incrementTotalCommits();
+            authorStatisticSet.getCommitStatisticForAuthor(commit.getAuthor()).incrementTotalCommits();
+            authorStatisticSet.incrementTotalCommits();
             if(commit.containsTests()){
-                commitsetStatistic.incrementTestedCommits();
-                commitsetStatistic.getAuthorByName(commit.getAuthor()).incrementTestedCommits();
+                authorStatisticSet.incrementTestedCommits();
+                authorStatisticSet.getCommitStatisticForAuthor(commit.getAuthor()).incrementTestedCommits();
             }
         }
-        return commitsetStatistic;
+        return authorStatisticSet;
     }
 
     public Map<String, Set<String>> filesByStory() {
@@ -71,39 +35,19 @@ public class Commitset {
         return map;
     }
 
-    public FilteredCommitSet getTestedCommitsByAuthor() {
-        FilteredCommitSet result = new FilteredCommitSet();
-        for(Commit commit : commits){
-            FilteredCommitSet authorsResult = result.filterBy(commit.getAuthor());
-            authorsResult.addCommit(commit);
-            if(commit.containsTests())
-                authorsResult.addTestedCommit(commit);
-        }
-        return result;
-    }
 
-    public FilteredCommitSet getTestedCommitsByStory() {
-        FilteredCommitSet result = new FilteredCommitSet();
-        for(Commit commit : commits){
-            FilteredCommitSet storyResult = result.filterBy(commit.getStory()).filterBy(commit.getAuthor());
-            storyResult.addCommit(commit);
-            if(commit.containsTests())
-                storyResult.addTestedCommit(commit);
-        }
-        return result;
-    }
-    //    public Map<String, Set<Commit>> commitsByAuthor(Iterable<Commit> commits) {
-//        HashMap<String, Set<Commit>> commitsByAuthor = new HashMap<String, Set<Commit>>();
+    //    public Map<String, Set<Commit>> commitStatisticsByAuthor(Iterable<Commit> commits) {
+//        HashMap<String, Set<Commit>> commitStatisticsByAuthor = new HashMap<String, Set<Commit>>();
 //        for(Commit commit : commits){
-//            if (commitsByAuthor.containsKey(commit.getAuthor()))
-//                commitsByAuthor.get(commit.getAuthor()).add(commit);
+//            if (commitStatisticsByAuthor.containsKey(commit.getAuthor()))
+//                commitStatisticsByAuthor.get(commit.getAuthor()).add(commit);
 //            else {
 //                Set<Commit> commitSet = new HashSet<Commit>();
 //                commitSet.add(commit);
-//                commitsByAuthor.put(commit.getAuthor(), commitSet);
+//                commitStatisticsByAuthor.put(commit.getAuthor(), commitSet);
 //            }
 //        }
-//        return commitsByAuthor;
+//        return commitStatisticsByAuthor;
 //    }
 
 

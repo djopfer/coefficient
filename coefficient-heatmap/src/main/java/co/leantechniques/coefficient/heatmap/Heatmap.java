@@ -18,7 +18,7 @@ public class Heatmap {
 	public String generate() {
         try {
             ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(codeRepository);
-            Map<String, HeatmapData> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
+            Map<String, HeatmapData> files = changesPerFile(changesetAnalyzer.getFilesByStory());
             String results = render(files);
             save(results);
             return results;

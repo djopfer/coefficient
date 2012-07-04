@@ -16,23 +16,21 @@ import static org.mockito.Mockito.when;
 public class RankGoalTest {
     @Mock Log mockLog;
     @Mock ChangesetAnalyzer mockChangesetAnalyzer;
-    @Mock AdapterFactory mockAdapterFactory;
+    @Mock CodeRepository mockCodeRepository;
     private RankGoal goal;
-    @Mock
-    CodeRepository mockCodeRepository;
     private Set<Commit> expectedCommits = new HashSet<Commit>();
-    private CommitsetStatistic expectedTenPercentReport = createExpectedReport();
+    private AuthorStatisticSet expectedTenPercentReport = createExpectedReport();
 
-    private CommitsetStatistic createExpectedReport() {
-        CommitsetStatistic report = new CommitsetStatistic();
+    private AuthorStatisticSet createExpectedReport() {
+        AuthorStatisticSet report = new AuthorStatisticSet();
         report.setTotalCommits(10);
         report.incrementTestedCommits();
 
-        report.getAuthorByName("tim").setCountOfCommits(10);
-        report.getAuthorByName("tim").setTestedCommits(10);
+        report.getCommitStatisticForAuthor("tim").setCountOfCommits(10);
+        report.getCommitStatisticForAuthor("tim").setTestedCommits(10);
 
-        report.getAuthorByName("rachel").setCountOfCommits(10);
-        report.getAuthorByName("rachel").setTestedCommits(5);
+        report.getCommitStatisticForAuthor("rachel").setCountOfCommits(10);
+        report.getCommitStatisticForAuthor("rachel").setTestedCommits(5);
 
         return report;
     }
