@@ -23,19 +23,19 @@ public class CommitMetricTest {
     public void knowsAuthorsFromAllTheCommits(){
         Set<Commit> expectedCommits = getExpectedCommits();
 
-        TestReport result = metric.getReport(expectedCommits);
+        CommitsetStatistic result = metric.getReport(expectedCommits);
 
         assertThat(result.getTotalCommits(), equalTo(3));
         assertThat(result.getTotalTestedCommits(), equalTo(2));
 
-        AuthorCommitInfo firstAuthorCommitData = result.getAuthors().get(0);
-        assertThat(firstAuthorCommitData.getName(), equalTo("joe"));
+        AuthorCommitStatistic firstAuthorCommitData = result.getCommitStatistics().get(0);
+        assertThat(firstAuthorCommitData.getAuthor(), equalTo("joe"));
         assertThat(firstAuthorCommitData.getCountOfCommits(), equalTo(1));
         assertThat(firstAuthorCommitData.getCountOfTestedCommits(), equalTo(1));
         assertThat(firstAuthorCommitData.getPercentageOfTestedCommits(), equalTo(1.0));
 
-        AuthorCommitInfo secondAuthor = result.getAuthors().get(1);
-        assertThat(secondAuthor.getName(), equalTo("tim"));
+        AuthorCommitStatistic secondAuthor = result.getCommitStatistics().get(1);
+        assertThat(secondAuthor.getAuthor(), equalTo("tim"));
         assertThat(secondAuthor.getCountOfCommits(), equalTo(2));
         assertThat(secondAuthor.getCountOfTestedCommits(), equalTo(1));
         assertThat(secondAuthor.getPercentageOfTestedCommits(), equalTo(.5));

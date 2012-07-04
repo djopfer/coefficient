@@ -18,7 +18,6 @@ public class Heatmap {
 	public String generate() {
         try {
             ChangesetAnalyzer changesetAnalyzer = new ChangesetAnalyzer(codeRepository);
-//            Map<String, ChangeInfo> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
             Map<String, HeatmapData> files = changesPerFile(changesetAnalyzer.groupChangesetsByStory());
             String results = render(files);
             save(results);
@@ -77,10 +76,7 @@ public class Heatmap {
 
     private void incrementChangeCountForFile(Map<String, HeatmapData> r, String file, boolean isDefect) {
         HeatmapData heatmapData = r.get(file);
-        heatmapData.changes++;
-        if (isDefect) {
-            heatmapData.defects++;
-        }
+        heatmapData.incrementCounters(isDefect);
     }
 
 }

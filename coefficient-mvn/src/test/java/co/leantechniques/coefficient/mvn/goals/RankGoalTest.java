@@ -10,8 +10,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,12 +18,13 @@ public class RankGoalTest {
     @Mock ChangesetAnalyzer mockChangesetAnalyzer;
     @Mock AdapterFactory mockAdapterFactory;
     private RankGoal goal;
-    @Mock CodeRepository mockCodeRepository;
+    @Mock
+    CodeRepository mockCodeRepository;
     private Set<Commit> expectedCommits = new HashSet<Commit>();
-    private TestReport expectedTenPercentReport = createExpectedReport();
+    private CommitsetStatistic expectedTenPercentReport = createExpectedReport();
 
-    private TestReport createExpectedReport() {
-        TestReport report = new TestReport();
+    private CommitsetStatistic createExpectedReport() {
+        CommitsetStatistic report = new CommitsetStatistic();
         report.setTotalCommits(10);
         report.incrementTestedCommits();
 

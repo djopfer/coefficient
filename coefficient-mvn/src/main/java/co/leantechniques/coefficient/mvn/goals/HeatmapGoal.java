@@ -1,6 +1,7 @@
 package co.leantechniques.coefficient.mvn.goals;
 
 import co.leantechniques.coefficient.heatmap.*;
+import co.leantechniques.coefficient.heatmap.CodeRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

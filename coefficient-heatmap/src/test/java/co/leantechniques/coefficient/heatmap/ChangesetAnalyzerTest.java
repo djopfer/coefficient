@@ -65,25 +65,23 @@ public class ChangesetAnalyzerTest {
     @Test
     public void treatsDefectsAsStories() throws Exception {
         givenCommits.add(builder.author("Bob Smith").description("DE1234 Some message").addFiles("File1.java").toCommit());
-//        String commit = logLine("Bob Smith||DE1234 Some Message||File1.java");
-//        analyzer = new ChangesetAnalyzer(streamFrom(commit), "||", "\\s+");
         results = analyzer.groupChangesetsByStory();
 
         assertTrue(assertStoryPresent("DE1234"));
         assertTrue(results.get("DE1234").contains("File1.java"));
     }
 
-    @Test
-    public void groupChangesetsByAuthor(){
-        givenCommits.add(builder.author("joe smith").description("US1234 Some message").addFiles("File1.java").toCommit());
-        givenCommits.add(builder.author("joe smith").description("US1234 Some other message").addFiles("File2.java").toCommit());
-        givenCommits.add(builder.author("peter smith").description("US1234 Some other message").addFiles("File1.java", "File3.java").toCommit());
-
-        Map<String, Set<Commit>> resultsByAuthor = analyzer.groupByAuthor();
-        
-        assertEquals(2, resultsByAuthor.get("joe smith").size());
-        assertEquals(1, resultsByAuthor.get("peter smith").size());
-    }
+//    @Test
+//    public void groupChangesetsByAuthor(){
+//        givenCommits.add(builder.author("joe smith").description("US1234 Some message").addFiles("File1.java").toCommit());
+//        givenCommits.add(builder.author("joe smith").description("US1234 Some other message").addFiles("File2.java").toCommit());
+//        givenCommits.add(builder.author("peter smith").description("US1234 Some other message").addFiles("File1.java", "File3.java").toCommit());
+//
+//        Map<String, Set<Commit>> resultsByAuthor = analyzer.groupByAuthor();
+//
+//        assertEquals(2, resultsByAuthor.get("joe smith").size());
+//        assertEquals(1, resultsByAuthor.get("peter smith").size());
+//    }
 
     @Test
     public void handlesMergeCommitsWithoutFiles(){

@@ -14,12 +14,12 @@ public class ChangesetAnalyzer {
         return new CommitMetric().filesByStory(commits);
     }
 
-    public Map<String, Set<Commit>> groupByAuthor() {
-        Set<Commit> commits = codeRepository.getCommits();
-        return new CommitMetric().commitsByAuthor(commits);
-    }
+//    public Map<String, Set<Commit>> groupByAuthor() {
+//        Set<Commit> commits = codeRepository.getCommits();
+//        return new CommitMetric().commitsByAuthor(commits);
+//    }
 
-    public TestReport getRankReport() {
+    public CommitsetStatistic getRankReport() {
         return new CommitMetric().getReport(codeRepository.getCommits());
     }
 }

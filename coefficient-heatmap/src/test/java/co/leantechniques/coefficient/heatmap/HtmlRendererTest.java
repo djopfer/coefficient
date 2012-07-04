@@ -3,7 +3,6 @@ package co.leantechniques.coefficient.heatmap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -39,14 +38,6 @@ public class HtmlRendererTest {
 
         assertMatches(".*AbstractChainOfResponsibilityFactory.*BasicChainOfResponsibilityFactory.*ZumbaTraining.*", render(changes));
     }
-
-//    private void numberOfChangesFor(String filename, int numberOfChanges) {
-//        ChangeInfo changeInfo = new ChangeInfo();
-//        for(int i = 0; i < numberOfChanges; i++) {
-//            changeInfo.changedForStory();
-//        }
-//        changes.put(filename, changeInfo);
-//    }
 
     @Test
     public void rendersEachFileAsATag() {

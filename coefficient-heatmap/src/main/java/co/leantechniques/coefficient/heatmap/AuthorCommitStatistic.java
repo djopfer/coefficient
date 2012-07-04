@@ -1,17 +1,17 @@
 package co.leantechniques.coefficient.heatmap;
 
-public class AuthorCommitInfo {
+public class AuthorCommitStatistic {
 
-    String name;
+    String author;
     int countOfTestedCommits;
     int countOfCommits;
 
-    public AuthorCommitInfo(String name) {
-        this.name = name;
+    public AuthorCommitStatistic(String author) {
+        this.author = author;
     }
 
-    public String getName() {
-        return name;
+    public String getAuthor() {
+        return author;
     }
 
     public int getCountOfTestedCommits() {
