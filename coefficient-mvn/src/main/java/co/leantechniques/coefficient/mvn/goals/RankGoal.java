@@ -28,7 +28,7 @@ public class RankGoal extends AbstractMojo{
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        AuthorStatisticSet authorStatisticSet = getChangesetAnalyzer().getRankReport();
+        AuthorStatisticSet authorStatisticSet = getChangesetAnalyzer().getAuthorStatistics();
         getLog().info(String.format("%.2f%% of the %d commits contain test files", authorStatisticSet.getPercentageOfTestedCommits()*100, authorStatisticSet.getTotalCommits()));
 
 

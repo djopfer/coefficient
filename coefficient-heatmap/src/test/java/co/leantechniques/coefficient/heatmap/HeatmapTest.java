@@ -19,48 +19,49 @@ public class HeatmapTest {
     private String reportFromHg;
     private Heatmap heatmap;
     private CodeRepository mockRepository;
-    private CommitInfoBuilder builder;
 
     @Before
     public void setUp() throws Exception {
         mockRepository = mock(CodeRepository.class);
         heatmap = new Heatmap(mockRepository, new NullWriter());
-        builder = CommitInfoBuilder.create();
     }
 
     @Test
     public void supportsCommitMessagesWithEmbeddedNewlines() {
         String descriptionWithNewLines = "US1234 Message with" + System.getProperty("line.separator") + "embedded newline";
-        givenLogContains(builder.author("tim").description(descriptionWithNewLines).addFiles("File1.java", "File2.java").toCommit());
+        givenLogContains(new Commit("tim", descriptionWithNewLines, "File1.java", "File2.java"));
 
         reportFromHg = heatmap.generate();
 
-        assertReportContains("File1.java");
-        assertReportContains("File2.java");
+        assertThat(reportFromHg, containsString("File1.java"));
+        assertThat(reportFromHg, containsString("File2.java"));
     }
 
     @Test
     public void reportsOnEachFileCommitted() {
         givenLogContains(
-                builder.author("tim").description("US1234 First message").addFiles("File1.java", "File2.java").toCommit(),
-                builder.author("tim").description("").addFiles("File2.java", "File3.java").toCommit());
+                new Commit("tim", "US1234 First message", "File1.java", "File1.java"),
+                new Commit("tim", "", "File2.java", "File3.java"));
+
+//                builder.author("tim").description("US1234 First message").addFiles("File1.java", "File2.java").toCommit(),
+//                builder.author("tim").description("").addFiles("File2.java", "File3.java").toCommit());
 
         reportFromHg = heatmap.generate();
 
-        assertReportContains("File1.java");
-        assertReportContains("File2.java");
-        assertReportContains("File3.java");
+        assertThat(reportFromHg, containsString("File1.java"));
+        assertThat(reportFromHg, containsString("File2.java"));
+        assertThat(reportFromHg, containsString("File3.java"));
     }
 
     @Test
     public void multipleCommitsForTheSameTicketAreTreatedAsSingleChange() {
         givenLogContains(
-                builder.author("tim").description("US1234 First message").addFiles("File1.java").toCommit(),
-                builder.author("tim").description("US1234 Second message").addFiles("File1.java").toCommit());
+                new Commit("tim", "US1234 First message", "File1.java"),
+                new Commit("tim", "US1234 Second message", "File1.java"));
 
         reportFromHg = heatmap.generate();
 
-        assertReportContains("File1.java -> Changes: 1  Defects: 0");
+        assertThat(reportFromHg, containsString("File1.java -> Changes: 1  Defects: 0"));
     }
 
     private void givenLogContains(Commit... commits) {
@@ -69,16 +70,12 @@ public class HeatmapTest {
 
     @Test
     public void writesTheReportToTheClientSpecifiedWriter() {
-        givenLogContains(builder.author("tim").description("US1234 First message").addFiles("File1.java").toCommit());
+        givenLogContains(new Commit("tim", "US1234 First message", "File1.java"));
 
         WriterSpy spy = new WriterSpy();
         new Heatmap(mockRepository, spy).generate();
 
         assertEquals("write(),close(),", spy.logString);
-    }
-
-    private void assertReportContains(String filename) {
-        assertThat(reportFromHg, containsString(filename));
     }
 
     private class NullWriter extends Writer {

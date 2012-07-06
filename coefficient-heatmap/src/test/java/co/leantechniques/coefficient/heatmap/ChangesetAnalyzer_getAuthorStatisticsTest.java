@@ -2,8 +2,10 @@ package co.leantechniques.coefficient.heatmap;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,23 +14,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ChangesetAnalyzer_getAuthorStatisticsTest {
 
-    private ChangesetAnalyzer commitset;
+    @InjectMocks
+    private ChangesetAnalyzer analyzer;
     @Mock
     private CodeRepository mockCodeRepository;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        Set<Commit> expectedCommits = getExpectedCommits();
-        when(mockCodeRepository.getCommits()).thenReturn(expectedCommits);
-        commitset = new ChangesetAnalyzer(mockCodeRepository);
+        when(mockCodeRepository.getCommits()).thenReturn(getExpectedCommits());
     }
 
     @Test
     public void knowsAuthorsFromAllTheCommits(){
-        AuthorStatisticSet result = commitset.getAuthorStatistics();
+        AuthorStatisticSet result = analyzer.getAuthorStatistics();
 
         assertThat(result.getTotalCommits(), equalTo(3));
         assertThat(result.getTotalTestedCommits(), equalTo(2));

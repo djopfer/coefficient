@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 public class CommitLogParserTest {
@@ -50,7 +51,7 @@ public class CommitLogParserTest {
 
         assertThat(actual.getAuthor(), is("tim"));
         assertThat(actual.getStory(), is("US1234"));
-        assertThat(actual.getFiles().size(), is(1));
+        assertThat(actual.getFiles(), hasSize(1));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class CommitLogParserTest {
         
         assertThat(actual.getAuthor(), is("tim"));
         assertThat(actual.getStory(), is("US1234"));
-        assertThat(actual.getFiles().size(), is(1));
+        assertThat(actual.getFiles(), hasSize(1));
     }
 
     @Test
@@ -81,7 +82,7 @@ public class CommitLogParserTest {
 
         assertThat(actual.getAuthor(), is("tim"));
         assertThat(actual.getStory(), is("US1234"));
-        assertThat(actual.getFiles().size(), is(0));
+        assertThat(actual.getFiles(), hasSize(0));
     }
 
     private void givenLogContains(String... commits) {
