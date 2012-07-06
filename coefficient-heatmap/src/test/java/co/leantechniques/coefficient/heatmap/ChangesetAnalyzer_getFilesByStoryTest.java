@@ -10,17 +10,15 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ChangesetAnalyzerTest {
+public class ChangesetAnalyzer_getFilesByStoryTest {
 
     private Map<String,Set<String>> results;
     private ChangesetAnalyzer analyzer;
-    private CommitInfoBuilder builder;
     private CodeRepository mockRepository;
     private Set<Commit> givenCommits;
 
     @Before
     public void setUp() throws Exception {
-        builder = CommitInfoBuilder.create();
         mockRepository = mock(CodeRepository.class);
         analyzer = new ChangesetAnalyzer(mockRepository);
         givenCommits = new HashSet<Commit>();
@@ -29,7 +27,7 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void organizesCommitsByStory() throws Exception {
-        givenCommits.add(builder.author("joesmith").description("US1234 Some hokey Message").addFiles("File1.java").toCommit());
+        givenCommits.add(new Commit("joesmith","US1234 Some hokey Message","File1.java"));
         
         results = analyzer.getFilesByStory();
 
@@ -40,7 +38,7 @@ public class ChangesetAnalyzerTest {
     @Test
     public void isntConfusedByEmbeddedNewlines() throws Exception {
         String descriptionWithNewLines = "US1234 Some hokey Message".replaceAll(" ", System.getProperty("line.separator"));
-        givenCommits.add(builder.author("joesmith").description(descriptionWithNewLines).addFiles("File1.java").toCommit());
+        givenCommits.add(new Commit("joesmith", descriptionWithNewLines, "File1.java"));
 
         results = analyzer.getFilesByStory();
 
@@ -50,9 +48,9 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void multipleFilesetsForTheSameStoryAreAggregated() throws Exception {
-        givenCommits.add(builder.author("joesmith").description("US1234 Some message").addFiles("File1.java").toCommit());
-        givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File2.java").toCommit());
-        givenCommits.add(builder.author("joesmith").description("US1234 Some other message").addFiles("File1.java","File3.java").toCommit());
+        givenCommits.add(new Commit("joesmith","US1234 Some message","File1.java"));
+        givenCommits.add(new Commit("joesmith","US1234 Some other message","File2.java"));
+        givenCommits.add(new Commit("joesmith","US1234 Some other message","File1.java","File3.java"));
 
         results = analyzer.getFilesByStory();
 
@@ -64,7 +62,7 @@ public class ChangesetAnalyzerTest {
 
     @Test
     public void treatsDefectsAsStories() throws Exception {
-        givenCommits.add(builder.author("Bob Smith").description("DE1234 Some message").addFiles("File1.java").toCommit());
+        givenCommits.add(new Commit("Bob Smith","DE1234 Some message","File1.java"));
         results = analyzer.getFilesByStory();
 
         assertTrue(assertStoryPresent("DE1234"));
@@ -83,9 +81,10 @@ public class ChangesetAnalyzerTest {
 //        assertEquals(1, resultsByAuthor.get("peter smith").size());
 //    }
 
+
     @Test
     public void handlesMergeCommitsWithoutFiles(){
-   		givenCommits.add(builder.author("joe smith").description("Merge").toCommit());
+   		givenCommits.add(new Commit("joe smith","Merge"));
         
 		results = analyzer.getFilesByStory();
 

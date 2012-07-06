@@ -2,21 +2,28 @@ package co.leantechniques.coefficient.heatmap;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
-public class CommitsetTest {
+public class ChangesetAnalyzer_getAuthorStatisticsTest {
 
-    private Commitset commitset;
+    private ChangesetAnalyzer commitset;
+    @Mock
+    private CodeRepository mockCodeRepository;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         Set<Commit> expectedCommits = getExpectedCommits();
-        commitset = new Commitset(expectedCommits);
+        when(mockCodeRepository.getCommits()).thenReturn(expectedCommits);
+        commitset = new ChangesetAnalyzer(mockCodeRepository);
     }
 
     @Test
